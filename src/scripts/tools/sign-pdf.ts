@@ -108,6 +108,7 @@ export function mount(root: HTMLElement) {
   const assets: Asset[] = [];
   const status = statusArea();
   const progress = progressBar();
+  const outStatus = statusArea(); // export result, shown right under the export button
 
   const workArea = h('div', { hidden: true });
   const info = h('p', { class: 'muted', hidden: true });
@@ -165,7 +166,7 @@ export function mount(root: HTMLElement) {
   function addOverlay(blob: Blob, aspect: number) {
     if (overlays.length >= MAX_OVERLAYS) return status.set('error', `You can add up to ${MAX_OVERLAYS} items.`);
     const asset: Asset = { blob, url: URL.createObjectURL(blob), aspect }; assets.push(asset);
-    const nw = Math.min(0.4, Math.max(0.12, aspect > 3 ? 0.4 : 0.28));
+    const nw = Math.min(0.32, Math.max(0.12, aspect > 3 ? 0.32 : 0.26));
     const o: Overlay = { id: nextId('ov'), page: current, asset, cx: 0.5, cy: 0.5, nw, rotation: 0 };
     overlays.push(o); status.clear(); select(o.id);
   }
@@ -392,8 +393,8 @@ export function mount(root: HTMLElement) {
 
   /* ---- export ---- */
   exportBtn.addEventListener('click', () => withBusy(exportBtn, 'Signing…', async () => {
-    status.clear();
-    if (!file || !overlays.length) return status.show('error', 'Add at least one signature, image or stamp first.');
+    outStatus.clear();
+    if (!file || !overlays.length) return outStatus.show('error', 'Add at least one signature, image or stamp first.');
     try {
       const pdf = await PDFDocument.load(new Uint8Array(await file.arrayBuffer()), { ignoreEncryption: false, updateMetadata: false });
       const pages = pdf.getPages();
@@ -411,9 +412,17 @@ export function mount(root: HTMLElement) {
       const out = new Blob([(await pdf.save()) as BlobPart], { type: 'application/pdf' });
       const name = `${safeBaseName(file.name, 'document')}-signed.pdf`;
       downloadBlob(out, name);
-      status.show('success', `Saved ${name} (${formatBytes(out.size)}) with ${overlays.length} item${overlays.length === 1 ? '' : 's'}. The original text and pages are unchanged and still selectable.`);
-      status.el.append(h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-secondary btn-small', onclick: () => downloadBlob(out, name) }, 'Download again')));
-    } catch (e) { status.show('error', pdfErrorMessage(e, 'This PDF')); }
+      outStatus.show('success', `Saved ${name} (${formatBytes(out.size)}) with ${overlays.length} item${overlays.length === 1 ? '' : 's'}. The original text and pages are unchanged and still selectable.`);
+      const actions = h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn btn-secondary btn-small', onclick: () => downloadBlob(out, name) }, 'Download again'));
+      const shareable = new File([out], name, { type: 'application/pdf' });
+      if (typeof navigator.canShare === 'function' && typeof navigator.share === 'function' && navigator.canShare({ files: [shareable] })) {
+        actions.append(h('button', { type: 'button', class: 'btn btn-primary btn-small', onclick: async () => {
+          try { await navigator.share({ files: [shareable], title: name }); }
+          catch (e) { if ((e as Error)?.name !== 'AbortError') outStatus.show('error', 'Sharing is not available here. Use Download instead.'); }
+        } }, 'Share…'));
+      }
+      outStatus.el.append(actions);
+    } catch (e) { outStatus.show('error', pdfErrorMessage(e, 'This PDF')); }
     finally { progress.hide(); }
   }));
 
@@ -425,27 +434,34 @@ export function mount(root: HTMLElement) {
   prev.addEventListener('click', () => showPage(current - 1)); next.addEventListener('click', () => showPage(current + 1));
   pageSel.addEventListener('change', () => showPage(Number(pageSel.value)));
   workArea.append(bar, h('div', { class: 'sign-nav' }, prev, pageSel, next, countLabel), stage, selBar,
-    h('div', { class: 'actions' }, exportBtn), progress.el);
+    h('div', { class: 'actions' }, exportBtn), progress.el, outStatus.el);
 
+  async function loadPdf(f: File) {
+    status.clear();
+    try {
+      const d = await openPdfJs(f);
+      await doc?.destroy();
+      // pdf-lib must also be able to open it for the export step (it cannot read encrypted files)
+      await PDFDocument.load(new Uint8Array(await f.arrayBuffer()), { ignoreEncryption: false, updateMetadata: false });
+      doc = d; file = f; overlays.length = 0; selected = null;
+      info.hidden = workArea.hidden = false;
+      info.textContent = `${f.name} · ${d.numPages} page${d.numPages === 1 ? '' : 's'} · ${formatBytes(f.size)}`;
+      pageSel.replaceChildren(...Array.from({ length: d.numPages }, (_, i) => h('option', { value: i }, `Page ${i + 1}`)));
+      await showPage(0);
+    } catch (e) { file = null; doc = null; info.hidden = workArea.hidden = true; status.set('error', pdfErrorMessage(e, `"${f.name.slice(0, 50)}"`)); }
+  }
   const dz = dropzone({
     kinds: ['pdf'], multiple: false, maxBytes: LIMITS.pdfBytes,
     onErrors: (e) => { status.clear(); if (e.length) status.show('error', e.length === 1 ? e[0] : ['Problems with your file:', ...e]); },
-    onFiles: async ([v]) => {
-      status.clear();
-      try {
-        const d = await openPdfJs(v.file);
-        await doc?.destroy();
-        // pdf-lib must also be able to open it for the export step (it cannot read encrypted files)
-        await PDFDocument.load(new Uint8Array(await v.file.arrayBuffer()), { ignoreEncryption: false, updateMetadata: false });
-        doc = d; file = v.file; overlays.length = 0; selected = null;
-        info.hidden = workArea.hidden = false;
-        info.textContent = `${file.name} · ${d.numPages} page${d.numPages === 1 ? '' : 's'} · ${formatBytes(file.size)}`;
-        pageSel.replaceChildren(...Array.from({ length: d.numPages }, (_, i) => h('option', { value: i }, `Page ${i + 1}`)));
-        await showPage(0);
-      } catch (e) { file = null; doc = null; info.hidden = workArea.hidden = true; status.set('error', pdfErrorMessage(e, `"${v.file.name.slice(0, 50)}"`)); }
-    },
+    onFiles: ([v]) => loadPdf(v.file),
   });
+  const sampleBtn = h('button', { type: 'button', class: 'btn btn-secondary btn-small' }, 'Try a sample agreement');
+  sampleBtn.addEventListener('click', () => withBusy(sampleBtn, 'Preparing…', async () => {
+    const { createSampleAgreement } = await import('../samplePdf');
+    await loadPdf(await createSampleAgreement());
+  }));
+  const sampleRow = h('p', { class: 'hint', style: 'margin:10px 0 0' }, 'No PDF handy? ', sampleBtn, ' It is a fictional two-page practice document created in your browser.');
 
-  root.append(dz.el, info, status.el, workArea);
+  root.append(dz.el, sampleRow, info, status.el, workArea);
   window.addEventListener('pagehide', () => assets.forEach((a) => URL.revokeObjectURL(a.url)));
 }

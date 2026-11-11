@@ -38,7 +38,7 @@
 | Type check (`astro check`) | 0 errors, 0 warnings |
 | ESLint | clean |
 | Unit tests | 88 passing |
-| E2E (Chromium, real files, all 16 tools, CSP enforced) | 27 passing |
+| E2E (Chromium, real files, all 16 tools, CSP enforced) | 28 passing |
 | axe-core WCAG 2 A/AA + best-practice on 26 pages + the signer with every dialog open | 0 violations |
 | Post-build verifier (titles, descriptions, canonicals, one H1, heading order, links, sitemap, no inline scripts) | passes |
 | Layout shift (16 tool pages × desktop & mobile 375 px) | worst CLS 0.0036 |

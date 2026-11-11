@@ -743,6 +743,44 @@ test('PDF Signer: typed signature, stamps, image with background removal, saved 
   assert.match(await page.getByRole('button', { name: /Saved signatures/ }).innerText(), /\(0\)/);
 });
 
+test('PDF Signer: sample agreement loads, can be signed, and the Share button hands the signed PDF to the native share sheet', async () => {
+  const page = await newPage();
+  // Simulate a phone browser that supports sharing files (desktop Chromium usually does not).
+  await page.addInitScript(() => {
+    window.__shared = null;
+    navigator.canShare = (d) => !!d && Array.isArray(d.files) && d.files.length > 0;
+    navigator.share = async (d) => { const f = d.files[0]; window.__shared = { name: f.name, type: f.type, size: f.size, bytes: new Uint8Array(await f.arrayBuffer()).slice(0, 5).join(',') }; };
+  });
+  await page.goto(`${base}/tools/sign-pdf/`);
+  await page.getByRole('button', { name: 'Try a sample agreement' }).click();
+  await page.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+  assert.match(await page.locator('#tool-root').innerText(), /Sample Agreement\.pdf · 2 pages/);
+  await page.getByLabel('Go to page').selectOption('1');
+  await page.getByRole('button', { name: 'Add date or text' }).click();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Insert', exact: true }).click();
+  await page.locator('.ov').waitFor();
+  const r = await download(page, () => page.getByRole('button', { name: 'Sign and download PDF' }).click());
+  assert.equal(r.name, 'Sample Agreement-signed.pdf');
+  const out = await PDFDocument.load(r.buf);
+  assert.equal(out.getPageCount(), 2);
+  await page.getByRole('button', { name: 'Share…' }).click();
+  await page.waitForFunction(() => window.__shared);
+  const shared = await page.evaluate(() => window.__shared);
+  assert.equal(shared.name, 'Sample Agreement-signed.pdf'); assert.equal(shared.type, 'application/pdf');
+  assert.equal(shared.bytes, '37,80,68,70,45'); // "%PDF-"
+  assert.ok(Math.abs(shared.size - r.buf.length) < 64, 'shared the same file that was downloaded');
+  // Without share support, the button is not offered
+  const p2 = await newPage();
+  await p2.addInitScript(() => { Object.defineProperty(navigator, 'canShare', { value: undefined }); });
+  await p2.goto(`${base}/tools/sign-pdf/`);
+  await p2.getByRole('button', { name: 'Try a sample agreement' }).click();
+  await p2.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+  await drawSignature(p2);
+  await download(p2, () => p2.getByRole('button', { name: 'Sign and download PDF' }).click());
+  assert.equal(await p2.getByRole('button', { name: 'Share…' }).count(), 0);
+  assert.ok(await p2.getByRole('button', { name: 'Download again' }).isVisible());
+});
+
 test('PDF Signer: rejects fake and encrypted-style files with clear messages', async () => {
   const page = await openTool('sign-pdf');
   await fileInput(page).setInputFiles([buf('fake.pdf', Buffer.from('hello'))]);

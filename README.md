@@ -25,7 +25,7 @@ npm run check        # TypeScript / Astro type check
 npm run lint         # ESLint
 npm test             # 88 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
 npm run verify       # post-build checks: SEO tags, links, sitemap, headings, inline scripts
-npm run test:e2e     # 27 real-browser tests of every tool + a11y (axe-core); run after build
+npm run test:e2e     # 28 real-browser tests of every tool + a11y (axe-core); run after build
 npm run test:cls     # layout-shift measurement of all tool pages
 npm run ci           # everything above in order
 ```
