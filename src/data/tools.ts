@@ -444,7 +444,7 @@ export const toolsByCategory = (c: Category) => TOOLS.filter((t) => t.category =
  * Measured from the real interface; re-measure if you change a tool's initial layout.
  */
 export const TOOL_UI_HEIGHT: Record<string, number> = {
-  'merge-pdf': 155, 'sign-pdf': 77, 'split-pdf': 77, 'compress-pdf': 77, 'pdf-to-image': 77, 'image-to-pdf': 155,
-  'image-compressor': 155, 'image-resizer': 77, 'image-cropper': 77, 'image-converter': 155, 'image-to-base64': 77,
+  'merge-pdf': 193, 'sign-pdf': 161, 'split-pdf': 115, 'compress-pdf': 115, 'pdf-to-image': 131, 'image-to-pdf': 193,
+  'image-compressor': 193, 'image-resizer': 115, 'image-cropper': 115, 'image-converter': 193, 'image-to-base64': 115,
   'bmi-calculator': 314, 'percentage-calculator': 1040, 'age-calculator': 141, 'loan-calculator': 884, 'discount-calculator': 542,
 };

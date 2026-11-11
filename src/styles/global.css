@@ -80,8 +80,9 @@ li { margin-bottom: .35em; }
 .icon-btn[disabled] { opacity: .35; cursor: not-allowed; }
 
 /* Hero & sections */
-.hero { padding: 36px 0 12px; max-width: 860px; }
-.hero h1 { margin-bottom: .4em; }
+.hero { padding: 36px 0 12px; }
+.hero h1 { margin-bottom: .4em; max-width: 880px; }
+.hero .lead { max-width: 760px; }
 .eyebrow { display: inline-block; font-size: .85rem; font-weight: 700; color: var(--teal-600); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 10px; }
 .trust-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 28px 0 8px; }
 .trust-item { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
@@ -93,8 +94,8 @@ li { margin-bottom: .35em; }
 
 /* Search & chips */
 .search { position: relative; max-width: 640px; margin: 22px 0 14px; }
-.search input { width: 100%; font: inherit; font-size: 1.05rem; padding: 15px 16px 15px 46px; border: 1.5px solid #c5d1e3; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); min-height: 54px; }
-.search input:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 4px rgba(26, 95, 208, .15); }
+.search input[type="search"] { width: 100%; font: inherit; font-size: 1.05rem; padding: 15px 16px 15px 46px; border: 1.5px solid #c5d1e3; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); min-height: 54px; }
+.search input[type="search"]:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 4px rgba(26, 95, 208, .15); }
 .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .chip { font: inherit; font-weight: 600; font-size: .92rem; padding: 7px 14px; border-radius: 999px; border: 1px solid #c5d1e3; background: var(--surface); color: var(--ink-2); cursor: pointer; min-height: 36px; }
@@ -150,7 +151,7 @@ li { margin-bottom: .35em; }
 .faq p { color: var(--ink-2); }
 
 /* Forms */
-.field { display: grid; gap: 6px; margin-bottom: 16px; }
+.field { display: grid; gap: 6px; margin-bottom: 16px; align-content: start; }
 .field label, .label { font-weight: 650; font-size: .93rem; color: var(--navy-900); }
 .hint { font-size: .85rem; color: var(--ink-3); }
 input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="search"], select, textarea {
@@ -161,7 +162,7 @@ input[aria-invalid="true"] { border-color: var(--err); }
 input[type="range"] { width: 100%; accent-color: var(--blue-600); min-height: 32px; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--blue-600); width: 18px; height: 18px; }
 .check { display: flex; gap: 10px; align-items: center; font-weight: 500; }
-.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: start; }
 .row > .field { margin-bottom: 0; }
 .row + .row, .row + .field, .field + .row { margin-top: 16px; }
 .seg { display: inline-flex; border: 1.5px solid #c5d1e3; border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
@@ -172,7 +173,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--blue-600); wid
 .range-out output { font-weight: 700; color: var(--blue-700); }
 
 /* Dropzone & files */
-.dropzone { border: 2px dashed #b4c4de; border-radius: 14px; background: var(--bg); padding: 30px 16px; text-align: center; cursor: pointer; transition: background .15s, border-color .15s; }
+.dropzone { display: block; position: relative; border: 2px dashed #b4c4de; border-radius: 14px; background: var(--bg); padding: 30px 16px; text-align: center; cursor: pointer; transition: background .15s, border-color .15s; }
 .dropzone:hover, .dropzone.drag { background: var(--blue-50); border-color: var(--blue-600); }
 .dropzone:focus-within { border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(26, 95, 208, .15); }
 .dropzone .icon { color: var(--blue-600); margin-bottom: 6px; }

@@ -41,6 +41,6 @@
 | E2E (Chromium, real files, all 16 tools, CSP enforced) | 28 passing |
 | axe-core WCAG 2 A/AA + best-practice on 26 pages + the signer with every dialog open | 0 violations |
 | Post-build verifier (titles, descriptions, canonicals, one H1, heading order, links, sitemap, no inline scripts) | passes |
-| Layout shift (16 tool pages × desktop & mobile 375 px) | worst CLS 0.0036 |
+| Layout shift (16 tool pages × desktop & mobile 375 px) | worst CLS 0.0000 (measured) |
 | `npm audit --omit=dev` | 0 vulnerabilities |
 | Not tested | Firefox, Safari/WebKit, real mobile devices, Lighthouse scores, very large (100 MB) files |

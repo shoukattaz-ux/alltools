@@ -17,5 +17,5 @@ for (const opts of [{ viewport: { width: 1280, height: 800 } }, { viewport: { wi
     await page.close();
   }
 }
-console.log('worst CLS across 15 tool pages x 2 viewports:', worst.toFixed(4));
+console.log('worst CLS across 16 tool pages x 2 viewports:', worst.toFixed(4));
 await browser.close(); server.close();

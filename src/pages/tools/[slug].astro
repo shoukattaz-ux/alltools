@@ -66,7 +66,7 @@ const guides = (await getCollection('blog')).filter((p) => p.data.tools.includes
       <div class="side-box">
         <h2>Related tools</h2>
         <ul>{related.map((r) => <li><a href={toolUrl(r)}>{r.name}</a></li>)}</ul>
-        <p style="margin:8px 0 0"><a href={cat.path}>All {cat.name.toLowerCase()} →</a></p>
+        <p style="margin:8px 0 0"><a href={cat.path}>All {cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase())} →</a></p>
       </div>
       <AdSlot placement="sidebar" />
     </aside>
