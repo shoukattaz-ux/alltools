@@ -1,7 +1,7 @@
 // End-to-end tests: drives the built site in real Chromium, exercising every tool with real files.
 // Run after `npm run build`:  npm run test:e2e
 import { chromium } from 'playwright-core';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import JSZip from 'jszip';
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, rmSync, existsSync } from 'node:fs';
@@ -78,7 +78,7 @@ const test = (name, fn) => tests.push({ name, fn });
 
 test('all pages load with 200, no console errors, CSP respected', async () => {
   const urls = ['/', '/tools/', '/pdf-tools/', '/image-tools/', '/calculators/', '/blog/', '/about/', '/contact/', '/privacy/', '/terms/', '/disclaimer/', '/cookies/', '/faq/', '/advertise/'];
-  const tools = ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator'];
+  const tools = ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator'];
   for (const t of tools) urls.push(`/tools/${t}/`);
   const html = readFileSync(resolve(here, '../../dist/sitemap-0.xml'), 'utf8');
   for (const m of html.matchAll(/\/blog\/([a-z0-9-]+)\//g)) urls.push(`/blog/${m[1]}/`);
@@ -107,7 +107,7 @@ test('homepage search and category filters work instantly', async () => {
   const page = await newPage();
   await page.goto(base + '/');
   const visible = () => page.locator('.tool-card:visible').count();
-  assert.equal(await visible(), 15);
+  assert.equal(await visible(), 16);
   await page.fill('[data-search-input]', 'loan');
   assert.equal(await visible(), 1);
   await page.fill('[data-search-input]', 'jpg to png');
@@ -119,7 +119,7 @@ test('homepage search and category filters work instantly', async () => {
   await page.getByRole('button', { name: 'Calculators' }).click();
   assert.equal(await visible(), 5);
   await page.getByRole('button', { name: 'PDF tools' }).click();
-  assert.equal(await visible(), 5);
+  assert.equal(await visible(), 6);
   await page.goto(base + '/tools/?q=resize');
   assert.equal(await page.locator('.tool-card:visible').count(), 1);
 });
@@ -542,7 +542,7 @@ test('accessibility: axe-core finds no violations on key pages and every tool', 
   const axeSrc = readFileSync(resolve(here, '../../node_modules/axe-core/axe.min.js'), 'utf8');
   const page = await newPage();
   const urls = ['/', '/tools/', '/pdf-tools/', '/blog/', '/blog/jpg-vs-png-vs-webp/', '/about/', '/contact/', '/privacy/', '/faq/', '/advertise/'];
-  for (const t of ['merge-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
+  for (const t of ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
   const bad = [];
   for (const u of urls) {
     await page.goto(base + u, { waitUntil: 'networkidle' });
@@ -551,6 +551,227 @@ test('accessibility: axe-core finds no violations on key pages and every tool', 
     const res = await page.evaluate(() => axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'] } }));
     for (const v of res.violations) bad.push(`${u}: ${v.id} (${v.impact}) ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`);
   }
+  assert.deepEqual(bad, []);
+});
+
+/* ---- PDF Signer helpers ---- */
+async function drawSignature(page, colorName = 'Red') {
+  await page.getByRole('button', { name: 'Draw or type signature' }).click();
+  const dlg = page.locator('dialog[open]');
+  await dlg.getByRole('button', { name: colorName, exact: true }).click();
+  const pad = dlg.locator('canvas.pad');
+  const b = await pad.boundingBox();
+  await page.mouse.move(b.x + b.width * 0.2, b.y + b.height * 0.6);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width * 0.4, b.y + b.height * 0.3, { steps: 6 });
+  await page.mouse.move(b.x + b.width * 0.6, b.y + b.height * 0.7, { steps: 6 });
+  await page.mouse.move(b.x + b.width * 0.8, b.y + b.height * 0.4, { steps: 6 });
+  await page.mouse.up();
+  await dlg.getByRole('button', { name: 'Insert signature' }).click();
+  await page.locator('.ov.selected').waitFor();
+}
+/** Renders page N of a PDF through the site's own PDF-to-image tool and returns the bounding box of red pixels (0..1 of the image) */
+async function redBox(pdf, pageNo = 1) {
+  const page = await openTool('pdf-to-image');
+  await fileInput(page).setInputFiles([buf('out.pdf', pdf)]);
+  await root(page).getByText(/pages? ·/).waitFor();
+  await page.getByPlaceholder(/Leave empty/).fill(String(pageNo));
+  await page.getByLabel('Resolution').selectOption('72');
+  await btn(page, 'Convert to images').click();
+  await root(page).locator('.out-card').first().waitFor({ timeout: 60000 });
+  const png = await download(page, () => root(page).getByRole('button', { name: 'Download', exact: true }).first().click());
+  const r = await page.evaluate(async (b64) => {
+    const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const bmp = await createImageBitmap(new Blob([u])); const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(bmp, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height).data; let minX = 1e9, minY = 1e9, maxX = -1, maxY = -1;
+    for (let y = 0; y < c.height; y++) for (let xx = 0; xx < c.width; xx++) { const i = (y * c.width + xx) * 4; if (d[i] > 170 && d[i + 1] < 100 && d[i + 2] < 100) { if (xx < minX) minX = xx; if (xx > maxX) maxX = xx; if (y < minY) minY = y; if (y > maxY) maxY = y; } }
+    return { w: c.width, h: c.height, minX, minY, maxX, maxY };
+  }, png.buf.toString('base64'));
+  await page.close();
+  return r.maxX < 0 ? null : { w: r.w, h: r.h, cx: (r.minX + r.maxX) / 2 / r.w, cy: (r.minY + r.maxY) / 2 / r.h, bw: (r.maxX - r.minX) / r.w };
+}
+
+test('PDF Signer: draw a signature, move it, export, and it lands where it was placed (page rotation 0/90/180/270)', async () => {
+  for (const rot of [0, 90, 180, 270]) {
+    const doc = await PDFDocument.create(); const font = await doc.embedFont(StandardFonts.Helvetica);
+    for (let i = 0; i < 2; i++) { const p = doc.addPage([612, 792]); p.drawText(`Sign here ${i + 1}`, { x: 60, y: 700, size: 24, font }); if (i === 0 && rot) p.setRotation(degrees(rot)); }
+    const src = Buffer.from(await doc.save());
+    const page = await openTool('sign-pdf');
+    assert.ok(await page.getByRole('button', { name: 'Sign and download PDF' }).count() === 0 || await page.getByRole('button', { name: 'Sign and download PDF' }).isHidden());
+    await fileInput(page).setInputFiles([buf('contract.pdf', src)]);
+    await page.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+    assert.ok(await page.getByRole('button', { name: 'Sign and download PDF' }).isDisabled(), 'export disabled until something is added');
+    await drawSignature(page);
+    // drag the signature to a different spot
+    await page.locator('.ov').scrollIntoViewIfNeeded();
+    const ob = await page.locator('.ov').boundingBox();
+    await page.mouse.move(ob.x + ob.width / 2, ob.y + ob.height / 2);
+    await page.mouse.down(); await page.mouse.move(ob.x + ob.width / 2 + 120, ob.y + ob.height / 2 - 90, { steps: 6 }); await page.mouse.up();
+    const sb = await page.locator('.sign-stage').boundingBox(); const nb = await page.locator('.ov').boundingBox();
+    const want = { cx: (nb.x + nb.width / 2 - sb.x) / sb.width, cy: (nb.y + nb.height / 2 - sb.y) / sb.height };
+    assert.ok(want.cx > 0.5 + 0.05, `overlay did not move right (${want.cx})`);
+    const r = await download(page, () => page.getByRole('button', { name: 'Sign and download PDF' }).click());
+    assert.equal(r.name, 'contract-signed.pdf');
+    const out = await PDFDocument.load(r.buf);
+    assert.equal(out.getPageCount(), 2);
+    const xo = (i) => { const res = out.getPage(i).node.Resources(); const x = res?.lookup(out.context.obj('XObject')); return x ? x.entries().length : 0; };
+    assert.equal(xo(0), 1, 'page 1 has the signature image'); assert.equal(xo(1), 0, 'page 2 untouched');
+    const box = await redBox(r.buf, 1);
+    assert.ok(box, `no red pixels found on the rendered page (rotation ${rot})`);
+    assert.ok(Math.abs(box.cx - want.cx) < 0.03 && Math.abs(box.cy - want.cy) < 0.03, `rotation ${rot}: expected centre ~(${want.cx.toFixed(3)}, ${want.cy.toFixed(3)}) but found (${box.cx.toFixed(3)}, ${box.cy.toFixed(3)})`);
+    // original text must still be real text (not rasterised): the output keeps the font resource
+    assert.ok(out.getPage(1).node.Resources().lookup(out.context.obj('Font')), 'text/fonts preserved');
+    await page.close();
+  }
+});
+
+test('PDF Signer: rotating the item rotates it in the output; resize handle changes size', async () => {
+  const page = await openTool('sign-pdf');
+  await fileInput(page).setInputFiles([buf('a.pdf', await makePdf(1, [612, 792]))]);
+  await page.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+  await drawSignature(page);
+  const w0 = (await page.locator('.ov').boundingBox()).width;
+  await page.locator('.ov').scrollIntoViewIfNeeded();
+  const h = await page.locator('.ov-handle.se').boundingBox();
+  await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2); await page.mouse.down(); await page.mouse.move(h.x + 120, h.y + 60, { steps: 6 }); await page.mouse.up();
+  const w1 = (await page.locator('.ov').boundingBox()).width;
+  assert.ok(w1 > w0 * 1.15, `resize handle did not enlarge (${w0} -> ${w1})`);
+  await page.getByRole('button', { name: 'Rotate +15°' }).click();
+  await page.getByRole('button', { name: 'Rotate +15°' }).click();
+  assert.match(await page.locator('.ov').getAttribute('style'), /rotate\(30deg\)/);
+  const r = await download(page, () => page.getByRole('button', { name: 'Sign and download PDF' }).click());
+  const box = await redBox(r.buf, 1);
+  assert.ok(box && box.bw > 0.1);
+  await page.getByRole('button', { name: 'Reset rotation' }).click();
+  assert.match(await page.locator('.ov').getAttribute('style'), /rotate\(0deg\)/);
+});
+
+test('PDF Signer: typed signature, stamps, image with background removal, saved signatures, copy to all pages, delete', async () => {
+  const page = await openTool('sign-pdf');
+  await fileInput(page).setInputFiles([buf('b.pdf', await makePdf(3, [612, 792]))]);
+  await page.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+  // typed signature, saved for reuse
+  await page.getByRole('button', { name: 'Draw or type signature' }).click();
+  let dlg = page.locator('dialog[open]');
+  await dlg.getByRole('button', { name: 'Insert signature' }).click();
+  await dlg.getByText('Please draw your signature first.').waitFor();
+  await dlg.getByRole('button', { name: 'Type', exact: true }).click();
+  await dlg.getByRole('button', { name: 'Insert signature' }).click();
+  await dlg.getByText('Please type your name first.').waitFor();
+  await dlg.getByPlaceholder('Type your name').fill('Alex Morgan');
+  await dlg.getByLabel('Save this signature in this browser for reuse').check();
+  await dlg.getByLabel('Name for the saved signature').fill('Work');
+  await dlg.getByRole('button', { name: 'Insert signature' }).click();
+  await page.locator('.ov.selected').waitFor();
+  assert.equal(await page.locator('.ov').count(), 1);
+  assert.match(await page.getByRole('button', { name: /Saved signatures/ }).innerText(), /\(1\)/);
+  // copy to all pages
+  await page.getByRole('button', { name: 'Copy to all pages' }).click();
+  await page.getByText('Copied to 2 other pages.').waitFor();
+  await page.getByRole('button', { name: 'Next →' }).click();
+  await page.locator('.ov').waitFor();
+  assert.equal(await page.locator('.ov').count(), 1);
+  await page.getByLabel('Go to page').selectOption('2');
+  await page.locator('.ov').waitFor();
+  // date stamp
+  await page.getByRole('button', { name: 'Add date or text' }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.getByLabel('Date', { exact: true }).fill('2026-03-09');
+  await dlg.getByLabel('Format').selectOption('1');
+  await dlg.locator('.checker canvas').waitFor();
+  await dlg.getByRole('button', { name: 'Insert', exact: true }).click();
+  await page.locator('.ov').nth(1).waitFor();
+  assert.equal(await page.locator('.ov').count(), 2);
+  // text stamp
+  await page.getByRole('button', { name: 'Add date or text' }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.getByRole('button', { name: 'Text stamp' }).click();
+  await dlg.getByRole('button', { name: 'CONFIDENTIAL' }).click();
+  assert.equal(await dlg.getByLabel('Stamp text').inputValue(), 'CONFIDENTIAL');
+  await dlg.getByLabel('Stamp text').fill('');
+  await dlg.getByRole('button', { name: 'Insert', exact: true }).click();
+  await dlg.getByText('Type some text first.').waitFor();
+  await dlg.getByLabel('Stamp text').fill('APPROVED');
+  await dlg.getByRole('button', { name: 'Insert', exact: true }).click();
+  await page.waitForFunction(() => document.querySelectorAll('.ov').length === 3);
+  // keyboard: Delete removes the selected item
+  await page.locator('.ov.selected').focus();
+  await page.keyboard.press('Delete');
+  assert.equal(await page.locator('.ov').count(), 2);
+  // image with background removal: black ink on white paper
+  const paper = await page.evaluate(async () => { const c = document.createElement('canvas'); c.width = 300; c.height = 120; const x = c.getContext('2d'); x.fillStyle = '#f8f8f4'; x.fillRect(0, 0, 300, 120); x.strokeStyle = '#102a80'; x.lineWidth = 6; x.beginPath(); x.moveTo(60, 80); x.bezierCurveTo(100, 10, 140, 110, 240, 40); x.stroke(); const b = await new Promise((r) => c.toBlob(r)); const u = new Uint8Array(await b.arrayBuffer()); let s = ''; for (const v of u) s += String.fromCharCode(v); return btoa(s); });
+  await page.getByRole('button', { name: 'Add image' }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.locator('input[type=file]').setInputFiles([buf('sig.png', Buffer.from(paper, 'base64'))]);
+  await dlg.locator('.checker img').waitFor();
+  const dims = await dlg.locator('.checker img').evaluate((i) => [i.naturalWidth, i.naturalHeight]);
+  assert.ok(dims[0] < 250 && dims[0] > 150 && dims[1] < 110, `background removed + trimmed, got ${dims}`);
+  await dlg.getByLabel('Remove background').uncheck();
+  await page.waitForFunction(() => { const i = document.querySelector('dialog[open] .checker img'); return i && i.naturalWidth === 300 - 0 || (i && i.naturalWidth >= 290); });
+  await dlg.getByLabel('Remove background').check();
+  await dlg.getByRole('button', { name: 'Insert image' }).click();
+  await page.waitForFunction(() => document.querySelectorAll('.ov').length === 3);
+  // invalid file rejected in the image dialog
+  await page.getByRole('button', { name: 'Add image' }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.locator('input[type=file]').setInputFiles([buf('x.png', Buffer.from('not an image'))]);
+  await dlg.getByText(/not a supported file/).waitFor();
+  await dlg.getByRole('button', { name: 'Cancel' }).click();
+  // saved signatures survive a reload and can be reused / deleted
+  await page.reload();
+  await page.locator('#tool-root input[type=file]').waitFor({ state: 'attached' });
+  await fileInput(page).setInputFiles([buf('b.pdf', await makePdf(1, [612, 792]))]);
+  await page.locator('.sign-stage canvas').waitFor();
+  assert.match(await page.getByRole('button', { name: /Saved signatures/ }).innerText(), /\(1\)/);
+  await page.getByRole('button', { name: /Saved signatures/ }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.getByText('Work', { exact: true }).waitFor();
+  await dlg.getByRole('button', { name: 'Insert', exact: true }).click();
+  await page.locator('.ov').waitFor();
+  await page.getByRole('button', { name: /Saved signatures/ }).click();
+  dlg = page.locator('dialog[open]');
+  await dlg.getByRole('button', { name: 'Delete saved signature Work' }).click();
+  await dlg.getByText(/no saved signatures yet/).waitFor();
+  await dlg.getByRole('button', { name: 'Done' }).click();
+  assert.match(await page.getByRole('button', { name: /Saved signatures/ }).innerText(), /\(0\)/);
+  // tampered local storage is ignored, not executed
+  await page.evaluate(() => localStorage.setItem('th-signatures', JSON.stringify([{ id: 'x', name: '<img src=x onerror=alert(1)>', png: 'javascript:alert(1)' }])));
+  await page.reload();
+  await fileInput(page).setInputFiles([buf('b.pdf', await makePdf(1, [612, 792]))]);
+  await page.locator('.sign-stage canvas').waitFor();
+  assert.match(await page.getByRole('button', { name: /Saved signatures/ }).innerText(), /\(0\)/);
+});
+
+test('PDF Signer: rejects fake and encrypted-style files with clear messages', async () => {
+  const page = await openTool('sign-pdf');
+  await fileInput(page).setInputFiles([buf('fake.pdf', Buffer.from('hello'))]);
+  await root(page).getByText(/not a supported file/).waitFor();
+  await fileInput(page).setInputFiles([buf('broken.pdf', Buffer.from('%PDF-1.7\ngarbage'))]);
+  await root(page).getByText(/damaged|could not be processed/i).first().waitFor();
+  assert.equal(await page.locator('.sign-stage').count(), 1);
+  assert.ok(await page.locator('.sign-stage').isHidden());
+});
+
+test('accessibility: PDF Signer with a document loaded and each dialog open', async () => {
+  const axeSrc = readFileSync(resolve(here, '../../node_modules/axe-core/axe.min.js'), 'utf8');
+  const page = await openTool('sign-pdf');
+  await fileInput(page).setInputFiles([buf('a.pdf', await makePdf(2, [612, 792]))]);
+  await page.locator('.sign-stage canvas').waitFor({ timeout: 30000 });
+  const bad = [];
+  const scan = async (label) => {
+    await page.evaluate(axeSrc);
+    const res = await page.evaluate(() => axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'] } }));
+    for (const v of res.violations) bad.push(`${label}: ${v.id} (${v.impact}) ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`);
+  };
+  await scan('loaded');
+  for (const name of ['Draw or type signature', 'Add image', 'Add date or text', 'Saved signatures']) {
+    await page.getByRole('button', { name: new RegExp(name) }).click();
+    await scan(name);
+    await page.keyboard.press('Escape');
+  }
+  await drawSignature(page, 'Navy');
+  await scan('with item selected');
   assert.deepEqual(bad, []);
 });
 

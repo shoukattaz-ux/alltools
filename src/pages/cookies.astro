@@ -13,6 +13,9 @@ const gaOn = !!SITE.analyticsId;
     <h2>Strictly necessary</h2>
     <p>The site itself sets <strong>no cookies</strong>. {hasOptionalTracking() ? 'To remember your consent choice, it stores one item named “th-consent” in your browser\'s local storage. It never leaves your device and is not sent to us.' : 'Because no optional cookies are currently used, no consent choice needs to be stored.'}</p>
 
+    <h2>Features you ask for</h2>
+    <p>If you choose “Save this signature in this browser” in the PDF signer, the signature image is stored in your browser's local storage under the name “th-signatures”. It stays on your device, is not sent to us, and is only created at your request. You can delete it in the “Saved signatures” window or by clearing site data.</p>
+
     <h2>Analytics</h2>
     {gaOn ? (
       <>

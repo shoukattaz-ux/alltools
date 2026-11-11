@@ -4,9 +4,10 @@ import { TOOLS, TOOL_UI_HEIGHT, CATEGORIES } from '../../src/data/tools';
 import { AD_SLOTS } from '../../src/data/ads';
 
 describe('tool definitions (SEO + completeness)', () => {
-  it('has the 15 required tools: 5 PDF, 5 image, 5 calculators', () => {
-    expect(TOOLS).toHaveLength(15);
-    for (const c of Object.keys(CATEGORIES)) expect(TOOLS.filter((t) => t.category === c)).toHaveLength(5);
+  it('has the 16 tools: 6 PDF, 5 image, 5 calculators', () => {
+    expect(TOOLS).toHaveLength(16);
+    for (const [c, n] of [['pdf', 6], ['image', 5], ['calculator', 5]] as const) expect(TOOLS.filter((t) => t.category === c)).toHaveLength(n);
+    expect(Object.keys(CATEGORIES)).toHaveLength(3);
   });
   it('has unique slugs, titles, descriptions and H1s', () => {
     for (const key of ['slug', 'seoTitle', 'metaDescription', 'h1', 'name'] as const) expect(new Set(TOOLS.map((t) => t[key])).size).toBe(TOOLS.length);
@@ -34,10 +35,10 @@ describe('tool definitions (SEO + completeness)', () => {
 
 describe('blog content', () => {
   const files = readdirSync('src/content/blog').filter((f) => f.endsWith('.md'));
-  it('has 10 articles with unique titles', () => {
-    expect(files).toHaveLength(10);
+  it('has 11 articles with unique titles', () => {
+    expect(files).toHaveLength(11);
     const titles = files.map((f) => /^title: "(.*)"$/m.exec(readFileSync(`src/content/blog/${f}`, 'utf8'))![1]);
-    expect(new Set(titles).size).toBe(10);
+    expect(new Set(titles).size).toBe(11);
   });
   it.each(files)('%s links to real tools and has a FAQ', (f) => {
     const text = readFileSync(`src/content/blog/${f}`, 'utf8');

@@ -26,8 +26,8 @@ export interface Tool {
 export const CATEGORIES: Record<Category, { name: string; path: string; title: string; description: string; blurb: string }> = {
   pdf: {
     name: 'PDF tools', path: '/pdf-tools/', title: 'Free Online PDF Tools',
-    description: 'Merge, split, compress and convert PDF files in your browser. No uploads, no sign-up: your documents stay on your device.',
-    blurb: 'Combine documents, pull out the pages you need, shrink large files for email, or turn pages into images. Everything runs in your browser, so confidential documents are never sent to a server.',
+    description: 'Merge, split, compress, sign and convert PDF files in your browser. No uploads, no sign-up: your documents stay on your device.',
+    blurb: 'Combine documents, pull out the pages you need, sign them, shrink large files for email, or turn pages into images. Everything runs in your browser, so confidential documents are never sent to a server.',
   },
   image: {
     name: 'Image tools', path: '/image-tools/', title: 'Free Online Image Tools',
@@ -64,8 +64,35 @@ export const TOOLS: Tool[] = [
       { q: 'Why does my PDF fail to load?', a: 'The most common reasons are that the file is password-protected, damaged, or is not really a PDF. Open it in a PDF viewer to check, and remove any password.' },
       { q: 'Is there a limit on the number of pages?', a: 'There is no fixed page limit, but each file can be up to 100 MB and you can merge up to 30 files at once. Your device\'s available memory is the practical limit.' },
     ],
-    related: ['split-pdf', 'compress-pdf', 'image-to-pdf'],
+    related: ['split-pdf', 'sign-pdf', 'compress-pdf', 'image-to-pdf'],
     search: 'merge combine join pdf files together concatenate',
+  },
+  {
+    slug: 'sign-pdf', name: 'PDF Signer', category: 'pdf', icon: 'sign',
+    short: 'Add a drawn or typed signature, an image, or a date and text stamp to a PDF.',
+    seoTitle: 'Sign PDF Online: Add Signature, Date & Stamp',
+    metaDescription: 'Sign a PDF in your browser: draw or type a signature, add a photo of one, or stamp a date or text. Move, resize and rotate, then download. Files are not uploaded.',
+    h1: 'Sign a PDF Online',
+    intro: 'Open a PDF, place your signature where it belongs, and download the signed copy. You can draw or type a signature, insert a picture of a handwritten one, and add date or text stamps such as APPROVED. Everything happens in your browser, so the document is never uploaded.',
+    local: true,
+    steps: ['Select your PDF. The first page appears.', 'Choose "Draw or type signature", "Add image" or "Add date or text". The item is placed in the middle of the current page.', 'Drag it into position. Use the round corner handle to resize, the top handle to rotate, or the buttons under the page. Use "Copy to all pages" for initials.', 'Switch pages with the page menu, then choose "Sign and download PDF".'],
+    features: ['Draw with a mouse, finger or stylus (undo, clear, five colours, three pen thicknesses), or type your name in a handwriting-style font.', 'Insert a photo of a signature, stamp or logo, with automatic background removal and margin trimming.', 'Date stamps in four formats and custom text stamps with colour, bold and italic.', 'Move, resize, rotate and delete items; keyboard arrows and Delete also work. Place items on any page.', 'Optionally save signatures in this browser for reuse.', 'Signs the original pages directly, so existing text stays selectable and file size barely changes.'],
+    examples: [
+      { title: 'Return a signed contract', body: 'Draw your signature, drag it onto the signature line on the last page, add a date stamp beside it, and send the signed PDF back.' },
+      { title: 'Initial every page', body: 'Insert your initials once, position them in the footer, and choose "Copy to all pages".' },
+      { title: 'Stamp a document APPROVED', body: 'Choose a text stamp, pick the preset, set the colour to green, and place it in the top corner.' },
+    ],
+    limits: ['This adds a picture of your signature. It is not a cryptographic digital signature or certificate-based signature, and it does not make the document tamper-evident.', 'Whether an image signature is legally acceptable depends on the document, the recipient and your country. Some situations require a qualified or certified electronic signature, a witness, or an original.', 'Password-protected (encrypted) PDFs cannot be opened. Fillable form fields are left as they are; this tool does not fill them in.', 'Typed signatures use a handwriting-style font that your device provides, so the look differs between devices.', 'Saved signatures are kept in this browser\'s local storage on this device only. Clearing site data deletes them, and they do not follow you to other devices.'],
+    faqs: [
+      { q: 'Is my document uploaded?', a: 'No. The PDF is opened and signed by code running in your browser. Nothing is sent to a server, and nothing is kept after you close the tab, except signatures you choose to save in your own browser.' },
+      { q: 'Is this a legally binding signature?', a: 'It places an image of your signature on the page. Many everyday documents accept this, but legal requirements vary by country and document type, and some require a qualified electronic signature or a wet-ink original. Check with the recipient or a legal professional if it matters.' },
+      { q: 'Does it change the rest of my PDF?', a: 'No. Your pages, text and images are kept as they are. The signature, image or stamp is added on top of the page content you choose.' },
+      { q: 'Can I sign with my phone?', a: 'Yes. The signature pad responds to touch and stylus, and the layout adapts to small screens. Drag items with one finger.' },
+      { q: 'Can I remove a signature after downloading?', a: 'The signed PDF has the items added into the page, so they cannot be moved afterwards. Keep your original, and use this tool again from the original if you need changes.' },
+      { q: 'How do I make a photographed signature transparent?', a: 'Sign on plain white paper in good light, take a straight-on photo, choose "Add image", and keep "Remove background" ticked. Check the preview before inserting.' },
+    ],
+    related: ['merge-pdf', 'compress-pdf', 'image-to-pdf', 'split-pdf'],
+    search: 'sign pdf signature esign electronic sign add signature stamp date initials fill',
   },
   {
     slug: 'split-pdf', name: 'PDF Splitter', category: 'pdf', icon: 'split',
@@ -112,7 +139,7 @@ export const TOOLS: Tool[] = [
       { q: 'Does compression lose quality?', a: 'Lossless clean-up does not change page content. Image-based modes use lossy JPEG compression and a reduced resolution, which does reduce sharpness. Higher levels preserve more detail.' },
       { q: 'Is my PDF uploaded?', a: 'No. The pages are rendered and rebuilt inside your browser.' },
     ],
-    related: ['merge-pdf', 'image-compressor', 'pdf-to-image'],
+    related: ['merge-pdf', 'sign-pdf', 'image-compressor', 'pdf-to-image'],
     search: 'compress reduce shrink pdf size smaller email optimize',
   },
   {
@@ -160,7 +187,7 @@ export const TOOLS: Tool[] = [
       { q: 'What does "fit to image" do?', a: 'Each page is created at the same proportions as its image, with no white borders other than the margin you choose.' },
       { q: 'Are my images uploaded?', a: 'No. Everything is processed locally in your browser.' },
     ],
-    related: ['merge-pdf', 'compress-pdf', 'image-compressor'],
+    related: ['merge-pdf', 'sign-pdf', 'compress-pdf', 'image-compressor'],
     search: 'image to pdf jpg png webp photo picture convert combine scan',
   },
   /* ------------------------------ Image ------------------------------ */
@@ -417,7 +444,7 @@ export const toolsByCategory = (c: Category) => TOOLS.filter((t) => t.category =
  * Measured from the real interface; re-measure if you change a tool's initial layout.
  */
 export const TOOL_UI_HEIGHT: Record<string, number> = {
-  'merge-pdf': 155, 'split-pdf': 77, 'compress-pdf': 77, 'pdf-to-image': 77, 'image-to-pdf': 155,
+  'merge-pdf': 155, 'sign-pdf': 77, 'split-pdf': 77, 'compress-pdf': 77, 'pdf-to-image': 77, 'image-to-pdf': 155,
   'image-compressor': 155, 'image-resizer': 77, 'image-cropper': 77, 'image-converter': 155, 'image-to-base64': 77,
   'bmi-calculator': 314, 'percentage-calculator': 1040, 'age-calculator': 141, 'loan-calculator': 884, 'discount-calculator': 542,
 };
