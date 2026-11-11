@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date.localeCompare(a.data.date) || a.data.title.localeCompare(b.data.title));
+---
+<Base title="Guides & Tutorials: PDFs, Images & Calculators" description="Practical guides on merging and compressing PDFs, choosing image formats, optimizing photos, protecting your privacy online, and understanding common calculators." breadcrumbs={[{ name: 'Guides', href: '/blog/' }]}>
+  <h1>Guides and tutorials</h1>
+  <p class="lead">Practical, plain-language articles that explain how our tools work and how to get good results.</p>
+  <ul class="post-list">
+    {posts.map((p) => (
+      <li class="card"><a class="post-card" href={`/blog/${p.id}/`}>
+        <span class="tag">{p.data.topic}</span>
+        <h2>{p.data.title}</h2>
+        <p>{p.data.description}</p>
+        <p class="muted" style="margin-top:8px;font-size:.88rem">{p.data.readingMinutes} min read</p>
+      </a></li>
+    ))}
+  </ul>
+</Base>

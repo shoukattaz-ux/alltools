@@ -1,0 +1,37 @@
+---
+import { SITE, hasOptionalTracking } from '../data/site';
+import { TOOLS, toolUrl } from '../data/tools';
+const groups = [
+  { title: 'PDF tools', items: TOOLS.filter((t) => t.category === 'pdf') },
+  { title: 'Image tools', items: TOOLS.filter((t) => t.category === 'image') },
+  { title: 'Calculators', items: TOOLS.filter((t) => t.category === 'calculator') },
+];
+const company = [['About us', '/about/'], ['Contact', '/contact/'], ['FAQ', '/faq/'], ['Guides', '/blog/'], ['Advertise with us', '/advertise/']];
+const legal = [['Privacy policy', '/privacy/'], ['Terms and conditions', '/terms/'], ['Disclaimer', '/disclaimer/'], ['Cookie policy', '/cookies/']];
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-about">
+        <a href="/" class="brand"><span>{SITE.name}</span></a>
+        <p>Free online tools that run in your browser. Files you open in our file tools are processed on your device and are not uploaded.</p>
+      </div>
+      {groups.map((g) => (
+        <div>
+          <h2 class="footer-title">{g.title}</h2>
+          <ul>{g.items.map((t) => <li><a href={toolUrl(t)}>{t.name}</a></li>)}</ul>
+        </div>
+      ))}
+      <div>
+        <h2 class="footer-title">Company</h2>
+        <ul>{company.map(([n, h]) => <li><a href={h}>{n}</a></li>)}</ul>
+        <h2 class="footer-title">Legal</h2>
+        <ul>
+          {legal.map(([n, h]) => <li><a href={h}>{n}</a></li>)}
+          {hasOptionalTracking() && <li><button type="button" class="link-button" data-consent-open>Cookie settings</button></li>}
+        </ul>
+      </div>
+    </div>
+    <p class="footer-note">© {new Date().getFullYear()} {SITE.name}. Calculators and tools are provided for general information. See the <a href="/disclaimer/">disclaimer</a>.</p>
+  </div>
+</footer>

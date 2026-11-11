@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, hasOptionalTracking } from '../data/site';
+const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+const gaOn = !!SITE.analyticsId;
+---
+<Base title="Privacy Policy" description={`How ${SITE.name} handles your information: files are processed in your browser, we do not require accounts, and optional analytics or advertising only load with your consent.`} breadcrumbs={[{ name: 'Privacy policy', href: '/privacy/' }]}>
+  <article class="prose legal">
+    <h1>Privacy Policy</h1>
+    <p class="muted">Last updated: {SITE.lastUpdated}</p>
+    <p>This policy explains what information {SITE.name} (“we”, “us”) handles when you use this website, and why. We have tried to keep it accurate and plain. If something here does not match what you observe, please <a href="/contact/">tell us</a>.</p>
+
+    <h2>1. Who is responsible</h2>
+    <p>The operator of this site is <span class="todo" data-owner-todo>{SITE.operator.legalName}</span>, <span class="todo" data-owner-todo>{SITE.operator.address}</span>. Contact: {SITE.contactEmail ? <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a> : <span class="todo" data-owner-todo>[OWNER TO COMPLETE: contact email]</span>}.</p>
+
+    <h2>2. Your files and the tools</h2>
+    <p>The PDF and image tools (merger, splitter, compressor, converters, cropper, resizer, Base64 encoder) run <strong>entirely in your browser</strong>. The files you select are read into your browser's memory, the result is generated there, and it is saved to your device when you download it. <strong>The site has no feature for uploading files, and your files are not sent to our servers.</strong> The calculators compute results in your browser and do not transmit the numbers or dates you enter.</p>
+    <p>Closing or reloading the page discards the files held in memory. Files you download are saved by your own browser in the location you choose; you are responsible for those copies.</p>
+
+    <h2>3. Information we and our provider receive automatically</h2>
+    <p>Like any website, our hosting infrastructure receives technical information when your browser requests a page, such as your IP address, the requested address, browser and device type, the referring page and the time of the request. This is needed to deliver the site and to protect it from abuse. The site is served through Cloudflare, which processes this data as our infrastructure provider and may keep short-term logs for security and reliability; see Cloudflare's own privacy policy for details. We do not use this data to identify individual visitors.</p>
+
+    <h2>4. Analytics</h2>
+    {gaOn ? (
+      <p>With your consent, we use Google Analytics 4 to understand which pages are used and how the site performs. Google Analytics sets cookies and receives information such as your IP address (which we configure to be anonymised), device and page-view data. It is not loaded unless you accept. You can change your choice at any time using “Cookie settings” in the footer. Google's privacy information applies to its processing.</p>
+    ) : (
+      <p>At the time of writing, this site does not use analytics that track individual visitors. If we add analytics in future, we will update this policy and ask for your consent where the law requires it.</p>
+    )}
+
+    <h2>5. Advertising</h2>
+    {adsOn ? (
+      <p>With your consent, this site displays advertising served by Google AdSense. Advertising providers may set cookies or use similar technologies to show and measure ads, and may personalise them. These are not loaded unless you accept. Ads are labelled and are never placed inside the tool controls.</p>
+    ) : (
+      <p>This site currently shows no advertising. We intend to use display advertising and possibly affiliate links in future. When we do, we will update this policy and our <a href="/cookies/">Cookie Policy</a>, label ads clearly, and ask for consent where required. Affiliate links, if used, will be disclosed.</p>
+    )}
+
+    <h2>6. Cookies and local storage</h2>
+    <p>Details are in our <a href="/cookies/">Cookie Policy</a>. In summary: the site itself sets no cookies{hasOptionalTracking() ? ' and stores your consent choice in your browser\'s local storage' : ''}.</p>
+
+    <h2>7. Messages you send us</h2>
+    <p>The contact form opens your own email application with a pre-filled message; nothing is stored by a server on this site. If you email us, we use your message and address only to respond and to keep a record of the conversation, and we keep it as long as needed for that purpose. Please do not email confidential documents.</p>
+
+    <h2>8. Legal bases (UK and EEA visitors)</h2>
+    <p>Where the UK GDPR or EU GDPR applies, we rely on legitimate interests for the technical data in section 3 (running and securing the site), on your consent for optional analytics and advertising cookies, and on legitimate interests or the steps you request for replying to messages.</p>
+
+    <h2>9. Sharing</h2>
+    <p>We do not sell personal information. Data may be processed by our infrastructure provider (Cloudflare){gaOn ? ', Google (analytics, with consent)' : ''}{adsOn ? ' and advertising partners (with consent)' : ''}, and may be disclosed if required by law.</p>
+
+    <h2>10. International transfers</h2>
+    <p>Our providers operate globally, so technical data may be processed outside your country. Where required, providers rely on recognised transfer mechanisms.</p>
+
+    <h2>11. Your rights</h2>
+    <p>Depending on where you live (for example the UK, EEA, California or Canada), you may have rights to access, correct, delete or restrict the use of your personal information, to object to certain processing, and to withdraw consent at any time. Because we do not ask for accounts or keep profiles, we may hold little or no information about you, but you can contact us to make a request. You may also complain to your local data-protection authority.</p>
+
+    <h2>12. Children</h2>
+    <p>The site is a general-audience utility and is not directed at children under 13 (or under 16 where that is the local age of digital consent). We do not knowingly collect personal information from children.</p>
+
+    <h2>13. Security</h2>
+    <p>The site is served over HTTPS. Because files are processed locally, they are never exposed to our servers. No method of transmission or storage is perfectly secure, and you should keep your device and browser up to date.</p>
+
+    <h2>14. Changes</h2>
+    <p>We may update this policy when the site changes. The date at the top shows the latest revision.</p>
+  </article>
+</Base>

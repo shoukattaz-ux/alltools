@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE } from '../../data/site';
+import { toolBySlug, toolUrl } from '../../data/tools';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const tools = d.tools.map((s) => toolBySlug(s)!).filter(Boolean);
+const url = `${SITE.url}/blog/${post.id}/`;
+const ld = [{
+  '@context': 'https://schema.org', '@type': 'Article', headline: d.title, description: d.description,
+  datePublished: d.date, dateModified: d.date, inLanguage: 'en', mainEntityOfPage: url,
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+}];
+const prettyDate = new Date(d.date + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<Base title={d.title} description={d.description} ogType="article" jsonLd={ld} breadcrumbs={[{ name: 'Guides', href: '/blog/' }, { name: d.title, href: `/blog/${post.id}/` }]}>
+  <article class="prose article">
+    <span class="tag">{d.topic}</span>
+    <h1 style="margin-top:10px">{d.title}</h1>
+    <p class="post-meta">By the {SITE.name} editorial team · {prettyDate} · {d.readingMinutes} min read</p>
+    <Content />
+    <AdSlot placement="blog-in-article" />
+    <div class="tool-cta">
+      <h2>Try the tools mentioned in this guide</h2>
+      <ul>{tools.map((t) => <li><a href={toolUrl(t)}>{t.name}</a>: {t.short}</li>)}</ul>
+    </div>
+    <p><a href="/blog/">← All guides</a></p>
+  </article>
+</Base>

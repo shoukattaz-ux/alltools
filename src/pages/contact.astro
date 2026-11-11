@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../data/site';
+---
+<Base title="Contact Us" description={`Contact the ${SITE.name} team with feedback, bug reports, advertising or business enquiries.`} breadcrumbs={[{ name: 'Contact', href: '/contact/' }]}>
+  <article class="prose">
+    <h1>Contact us</h1>
+    <p class="lead">We read every message about bugs, feature ideas and partnership enquiries.</p>
+
+    {SITE.contactEmail ? (
+      <p><Icon name="mail" size={18} /> Email: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a></p>
+    ) : (
+      <div class="notice notice-warn" role="note"><Icon name="alert" size={18} /><span><span class="todo" data-owner-todo>[OWNER TO COMPLETE: set PUBLIC_CONTACT_EMAIL in the build environment]</span> A contact address has not been configured yet, so the form below is disabled.</span></div>
+    )}
+
+    <h2>Send a message</h2>
+    <p class="muted">This form opens your own email app with the message pre-filled. We have no server that stores messages from this page.</p>
+    <form id="contact-form" data-email={SITE.contactEmail} novalidate>
+      <div class="row">
+        <div class="field"><label for="c-name">Your name</label><input id="c-name" name="name" type="text" maxlength="80" autocomplete="name" required /></div>
+        <div class="field"><label for="c-email">Your email</label><input id="c-email" name="email" type="email" maxlength="120" autocomplete="email" required /></div>
+      </div>
+      <div class="field" style="margin-top:16px"><label for="c-topic">Topic</label>
+        <select id="c-topic" name="topic"><option>Feedback or bug report</option><option>Tool request</option><option>Advertising or sponsorship</option><option>Privacy request</option><option>Other</option></select></div>
+      <div class="field"><label for="c-msg">Message</label><textarea id="c-msg" name="message" maxlength="3000" required></textarea>
+        <span class="hint">Please do not include passwords or confidential documents.</span></div>
+      <div class="actions"><button class="btn btn-primary" type="submit" disabled={!SITE.contactEmail}>Open email draft</button></div>
+      <div id="contact-status" role="status" aria-live="polite"></div>
+    </form>
+  </article>
+  <script>
+    import '../scripts/contact';
+  </script>
+</Base>

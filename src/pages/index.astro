@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ToolBrowser from '../components/ToolBrowser.astro';
+import AdSlot from '../components/AdSlot.astro';
+import FaqList from '../components/FaqList.astro';
+import { SITE } from '../data/site';
+import { CATEGORIES, TOOLS, type Category } from '../data/tools';
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date.localeCompare(a.data.date) || a.data.title.localeCompare(b.data.title)).slice(0, 3);
+const faqs = [
+  { q: 'Are my files uploaded to your servers?', a: 'No. The PDF and image tools run in your browser, so the files you select are read and processed on your own device. You can confirm this in your browser\'s network inspector.' },
+  { q: 'Do I need an account?', a: 'No. There is no sign-up, and the tools are free to use.' },
+  { q: 'Is there a file size limit?', a: 'Yes, to protect your browser\'s memory: up to 100 MB per PDF and 30 MB per image. Each tool page lists its limits.' },
+  { q: 'Do the tools work on phones?', a: 'Yes. The layouts are responsive, and the tools work in current mobile browsers. Very large files may be slow on older phones.' },
+];
+---
+<Base rawTitle title={`${SITE.name}: Free Online PDF, Image & Calculator Tools`} description={SITE.description}>
+  <section class="hero">
+    <span class="eyebrow">Free · No sign-up · Private</span>
+    <h1>Everyday PDF, image and calculator tools that work in your browser</h1>
+    <p class="lead">Merge and compress PDFs, resize and convert images, or work out a loan payment. Your files are processed on your own device and are never uploaded.</p>
+    <ToolBrowser id="home" />
+  </section>
+
+  <section class="trust-row" aria-label="Why use this site">
+    <div class="trust-item"><Icon name="lock" /><div><strong>Files stay on your device</strong><span>PDF and image tools run locally in your browser. No upload step exists.</span></div></div>
+    <div class="trust-item"><Icon name="zap" /><div><strong>Fast and simple</strong><span>No account, no watermarks, no queue. Open a tool and use it.</span></div></div>
+    <div class="trust-item"><Icon name="info" /><div><strong>Honest results</strong><span>Each tool explains its limits and trade-offs, such as what PDF compression costs in quality.</span></div></div>
+    <div class="trust-item"><Icon name="shield" /><div><strong>Transparent policies</strong><span>Plain-language <a href="/privacy/">privacy</a> and <a href="/cookies/">cookie</a> information that matches how the site works.</span></div></div>
+  </section>
+
+  <section class="section" aria-labelledby="how">
+    <h2 id="how">How it works</h2>
+    <ol class="steps content-block">
+      <li><strong>Pick a tool.</strong> Search above or browse by category.</li>
+      <li><strong>Add your file or numbers.</strong> Drag a file in, or type your values. Everything is checked before processing.</li>
+      <li><strong>Download or read the result.</strong> Files are created in your browser and saved to your device.</li>
+    </ol>
+  </section>
+
+  <section class="section" aria-labelledby="cats">
+    <h2 id="cats">Browse by category</h2>
+    <ul class="grid">
+      {(Object.keys(CATEGORIES) as Category[]).map((c) => (
+        <li class="card"><a class="cat-card" href={CATEGORIES[c].path}>
+          <span class={`tool-icon cat-${c}`}><Icon name={c === 'calculator' ? 'calculator' : c} /></span>
+          <h3>{CATEGORIES[c].name}</h3>
+          <p>{TOOLS.filter((t) => t.category === c).map((t) => t.name).join(', ')}.</p>
+        </a></li>
+      ))}
+    </ul>
+  </section>
+
+  <AdSlot placement="home-content" />
+
+  <section class="section" aria-labelledby="guides">
+    <h2 id="guides">Latest guides</h2>
+    <ul class="post-list">
+      {posts.map((p) => (
+        <li class="card"><a class="post-card" href={`/blog/${p.id}/`}>
+          <span class="tag">{p.data.topic}</span>
+          <h3 style="margin:6px 0">{p.data.title}</h3>
+          <p>{p.data.description}</p>
+        </a></li>
+      ))}
+    </ul>
+    <p><a href="/blog/">See all guides →</a></p>
+  </section>
+
+  <section class="section content-block" aria-labelledby="faq">
+    <h2 id="faq">Common questions</h2>
+    <FaqList faqs={faqs} />
+    <p><a href="/faq/">More questions and answers →</a></p>
+  </section>
+</Base>

@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site';
+---
+<Base title="Terms and Conditions" description={`The terms for using ${SITE.name}: acceptable use, no-warranty provisions for our free tools and calculators, intellectual property and limitation of liability.`} breadcrumbs={[{ name: 'Terms and conditions', href: '/terms/' }]}>
+  <article class="prose legal">
+    <h1>Terms and Conditions</h1>
+    <p class="muted">Last updated: {SITE.lastUpdated}</p>
+    <p>By using {SITE.name} (the “Site”), you agree to these terms. If you do not agree, please do not use the Site.</p>
+
+    <h2>1. The service</h2>
+    <p>The Site provides free online tools for working with PDF and image files and for common calculations. Tools may change, be limited or be withdrawn at any time. We may introduce paid features in future; if so, their terms will be shown before you purchase.</p>
+
+    <h2>2. Your files and content</h2>
+    <p>Files you open in the tools are processed in your browser and are not uploaded to us. You keep all rights in your files. You are responsible for having the right to process any file you use, and for keeping backups. Always keep your originals: the tools create new files and do not modify the ones you select.</p>
+
+    <h2>3. Acceptable use</h2>
+    <p>You agree not to: use the Site to break the law or infringe others' rights; attempt to disrupt, overload or probe the Site's security; scrape the Site at a rate that harms its operation; or use the Site to process content you are not entitled to handle.</p>
+
+    <h2>4. Accuracy and no professional advice</h2>
+    <p>The tools and calculators are provided for general information. Results may contain errors or depend on assumptions stated on each page. The health, finance and other calculators are not professional advice; see our <a href="/disclaimer/">Disclaimer</a>.</p>
+
+    <h2>5. No warranty</h2>
+    <p>The Site and tools are provided “as is” and “as available”, without warranties of any kind, express or implied, including fitness for a particular purpose, accuracy, or uninterrupted operation, to the fullest extent permitted by law. Output files (for example compressed or converted files) may differ from the originals; check them before relying on them.</p>
+
+    <h2>6. Limitation of liability</h2>
+    <p>To the fullest extent permitted by law, we are not liable for any indirect, incidental, special or consequential loss, loss of data, profit or goodwill arising from your use of the Site. Nothing in these terms limits liability that cannot be limited by law, such as for death or personal injury caused by negligence or for fraud.</p>
+
+    <h2>7. Intellectual property</h2>
+    <p>The Site's design, text and code are owned by or licensed to the operator, except for open-source components, which remain under their own licences. You may link to the Site. You may not copy substantial parts of our content for republication without permission.</p>
+
+    <h2>8. Third-party links and advertising</h2>
+    <p>The Site may contain links to third-party sites and, in future, advertising or affiliate links, which will be labelled. We do not control and are not responsible for third-party content or services.</p>
+
+    <h2>9. Changes to these terms</h2>
+    <p>We may update these terms. Continued use after an update means you accept the revised terms.</p>
+
+    <h2>10. Governing law</h2>
+    <p>These terms are governed by the laws of <span class="todo" data-owner-todo>{SITE.operator.governingLaw}</span>, and the courts of that jurisdiction have jurisdiction, subject to any mandatory consumer rights you have in your country of residence.</p>
+
+    <h2>11. Contact</h2>
+    <p>Questions about these terms: see our <a href="/contact/">contact page</a>.</p>
+  </article>
+</Base>

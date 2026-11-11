@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import ToolBrowser from '../components/ToolBrowser.astro';
+---
+<Base title="Page Not Found" description="The page you were looking for does not exist. Search our free tools or return to the homepage." noindex>
+  <h1>Page not found</h1>
+  <p class="lead">That page does not exist or has moved. Try searching for a tool, or go to the <a href="/">homepage</a>.</p>
+  <ToolBrowser id="nf" showFilters={false} />
+</Base>

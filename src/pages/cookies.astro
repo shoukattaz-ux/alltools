@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, hasOptionalTracking } from '../data/site';
+const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+const gaOn = !!SITE.analyticsId;
+---
+<Base title="Cookie Policy" description={`Which cookies and similar technologies ${SITE.name} uses: none by default, with optional analytics or advertising only after you give consent.`} breadcrumbs={[{ name: 'Cookie policy', href: '/cookies/' }]}>
+  <article class="prose legal">
+    <h1>Cookie Policy</h1>
+    <p class="muted">Last updated: {SITE.lastUpdated}</p>
+    <p>Cookies are small text files stored by your browser. Similar technologies include local storage. This page lists what {SITE.name} uses.</p>
+
+    <h2>Strictly necessary</h2>
+    <p>The site itself sets <strong>no cookies</strong>. {hasOptionalTracking() ? 'To remember your consent choice, it stores one item named “th-consent” in your browser\'s local storage. It never leaves your device and is not sent to us.' : 'Because no optional cookies are currently used, no consent choice needs to be stored.'}</p>
+
+    <h2>Analytics</h2>
+    {gaOn ? (
+      <>
+        <p>With your consent, Google Analytics 4 is loaded and sets cookies (typically names beginning “_ga”) to distinguish visitors and sessions and to measure page views. Provider: Google LLC. We configure IP anonymisation. Not loaded if you reject.</p>
+      </>
+    ) : (
+      <p>Not currently used.</p>
+    )}
+
+    <h2>Advertising</h2>
+    {adsOn ? (
+      <p>With your consent, Google AdSense is loaded. Google and its partners may set or read cookies to deliver, limit the frequency of, and measure advertisements, and may personalise them. Not loaded if you reject.</p>
+    ) : (
+      <p>Not currently used. If advertising is added, it will be loaded only after consent, and this page will be updated.</p>
+    )}
+
+    <h2>Third-party content</h2>
+    <p>This site does not embed social media widgets, videos or other third-party content that sets cookies.</p>
+
+    <h2>Managing your choices</h2>
+    <ul>
+      {hasOptionalTracking() && <li>Use <button type="button" class="link-button" data-consent-open>Cookie settings</button> (also in the footer) to accept or reject optional cookies at any time.</li>}
+      <li>You can block or delete cookies in your browser settings. Blocking essential storage may stop the site remembering your choices, but the tools will keep working.</li>
+    </ul>
+    <p>More detail on how we handle information is in our <a href="/privacy/">Privacy Policy</a>.</p>
+  </article>
+</Base>

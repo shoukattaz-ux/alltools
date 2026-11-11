@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site';
+import { TOOLS } from '../data/tools';
+---
+<Base title="About Us" description={`${SITE.name} offers free PDF, image and calculator tools that run in your browser, so your files stay on your device. Learn how and why the site works the way it does.`} breadcrumbs={[{ name: 'About us', href: '/about/' }]}>
+  <article class="prose">
+    <h1>About {SITE.name}</h1>
+    <p class="lead">{SITE.name} is a collection of {TOOLS.length} free online tools for everyday document, image and calculation tasks.</p>
+
+    <h2>What we do</h2>
+    <p>People regularly need to merge a few PDFs, shrink a photo for a form, or work out a monthly payment. Many websites that offer these jobs ask you to upload your files to their servers, often with sign-ups, watermarks or limits. We built {SITE.name} to offer a simpler alternative.</p>
+
+    <h2>How the tools work</h2>
+    <p>Our PDF and image tools run in your web browser using open-source libraries. When you choose a file, your browser reads it and creates the result on your device. The file is not sent to our servers, because the site has no upload feature at all. Our calculators likewise compute everything in your browser.</p>
+    <p>You can check this yourself with your browser's network inspector. We explain how in our guide <a href="/blog/are-online-pdf-tools-safe/">Are online PDF and image tools safe?</a></p>
+
+    <h2>Our principles</h2>
+    <ul class="ticks">
+      <li><strong>Honest tools.</strong> If a feature has a trade-off (for example, PDF compression that turns text into images), we say so on the page.</li>
+      <li><strong>Privacy by design.</strong> We collect as little as possible. Read the <a href="/privacy/">Privacy Policy</a>.</li>
+      <li><strong>Useful content.</strong> Our guides are written to help you complete a task, not to pad pages.</li>
+      <li><strong>Clearly labelled advertising.</strong> The site is intended to be supported by advertising and, in future, other revenue such as affiliate links or premium features. Any advertising will be clearly marked and kept away from the tool controls. See <a href="/advertise/">Advertise with us</a>.</li>
+    </ul>
+
+    <h2>Open-source software we rely on</h2>
+    <p>The tools are built on <a href="https://pdf-lib.js.org/" rel="noopener">pdf-lib</a>, <a href="https://mozilla.github.io/pdf.js/" rel="noopener">PDF.js</a> and <a href="https://stuk.github.io/jszip/" rel="noopener">JSZip</a>, and on standard browser features such as the Canvas API. The site is built with <a href="https://astro.build/" rel="noopener">Astro</a>.</p>
+
+    <h2>Who runs the site</h2>
+    <p>The site is operated by <span class="todo" data-owner-todo>[OWNER TO COMPLETE: name of the individual or company operating the site]</span>. Contact details are on the <a href="/contact/">contact page</a>.</p>
+
+    <h2>Feedback</h2>
+    <p>Found a bug, a file that does not work, or a tool you would like to see? <a href="/contact/">Tell us</a>. Please do not send us confidential documents.</p>
+  </article>
+</Base>

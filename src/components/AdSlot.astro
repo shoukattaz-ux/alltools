@@ -1,0 +1,18 @@
+---
+/**
+ * Advertising container. Renders NOTHING unless ads are enabled in the environment, an ad client ID is set,
+ * and this placement has an ad-unit slot ID in src/data/ads.ts. See docs/ADVERTISING.md.
+ */
+import { SITE } from '../data/site';
+import { AD_SLOTS, type AdPlacement } from '../data/ads';
+interface Props { placement: AdPlacement }
+const { placement } = Astro.props;
+const cfg = AD_SLOTS[placement];
+const active = SITE.adsEnabled && SITE.adsense.client && cfg.slot;
+---
+{active && (
+  <aside class="ad" aria-label="Advertisement" style={`min-height:${cfg.minHeight}px`}>
+    <span class="ad-label">Advertisement</span>
+    <ins class="adsbygoogle" style="display:block" data-ad-client={SITE.adsense.client} data-ad-slot={cfg.slot} data-ad-format="auto" data-full-width-responsive="true"></ins>
+  </aside>
+)}

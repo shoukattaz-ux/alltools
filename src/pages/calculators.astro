@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import ToolBrowser from '../components/ToolBrowser.astro';
+import { CATEGORIES, toolsByCategory } from '../data/tools';
+const cat = CATEGORIES.calculator;
+const tools = toolsByCategory('calculator');
+---
+<Base title={cat.title} description={cat.description} breadcrumbs={[{ name: cat.name, href: cat.path }]}>
+  <h1>{cat.title}</h1>
+  <p class="lead">{cat.blurb}</p>
+  <ToolBrowser id="calculator" category="calculator" showFilters={false} />
+  <section class="section content-block">
+    <h2>About these {cat.name.toLowerCase()}</h2>
+    <ul class="ticks">
+      {tools.map((t) => <li><a href={`/tools/${t.slug}/`}><strong>{t.name}</strong></a>: {t.short}</li>)}
+    </ul>
+    <p>Not sure where to start? Browse <a href="/tools/">all tools</a> or read our <a href="/blog/">guides</a>.</p>
+  </section>
+</Base>

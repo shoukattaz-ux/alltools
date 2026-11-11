@@ -1,0 +1,5 @@
+# Optional: only needed for direct uploads with Wrangler (`npm run build && npx wrangler pages deploy`).
+# Git-connected Cloudflare Pages projects are configured in the dashboard instead (see docs/DEPLOYMENT.md).
+name = "toolhaven"                 # change to your Pages project name
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-01"

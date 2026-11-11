@@ -1,0 +1,10 @@
+---
+/**
+ * For FUTURE affiliate links. Not used anywhere yet. Always marks the link as sponsored (rel="sponsored") and
+ * shows a visible disclosure, as required by advertising-disclosure rules and search-engine guidelines.
+ * Usage: <AffiliateLink href="https://merchant.example/?ref=you">Product name</AffiliateLink>
+ */
+interface Props { href: string }
+const { href } = Astro.props;
+---
+<a href={href} rel="sponsored nofollow noopener" target="_blank"><slot /></a><span class="muted" style="font-size:.8em"> (affiliate link)</span>

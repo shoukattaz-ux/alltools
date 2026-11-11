@@ -1,0 +1,28 @@
+---
+/** Only rendered when optional analytics or advertising is configured. Nothing optional loads before the visitor accepts. */
+import { SITE, hasOptionalTracking } from '../data/site';
+const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+---
+{hasOptionalTracking() && (
+  <>
+    <div class="consent" role="region" aria-label="Cookie consent" hidden data-consent-banner>
+      <p>We use optional cookies for {SITE.analyticsId ? 'anonymous usage statistics' : ''}{SITE.analyticsId && adsOn ? ' and ' : ''}{adsOn ? 'advertising' : ''}. Essential functions work without them. <a href="/cookies/">Learn more</a></p>
+      <div class="consent-actions">
+        <button class="btn btn-secondary" type="button" data-consent="denied">Reject optional</button>
+        <button class="btn btn-primary" type="button" data-consent="granted">Accept</button>
+      </div>
+    </div>
+    <dialog class="modal" aria-labelledby="consent-title" data-consent-dialog>
+      <h2 id="consent-title">Cookie settings</h2>
+      <p>Choose whether optional cookies may be used. You can change this at any time.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" type="button" data-consent="denied">Reject optional</button>
+        <button class="btn btn-primary" type="button" data-consent="granted">Accept</button>
+      </div>
+    </dialog>
+    <div hidden data-consent-config data-ga={SITE.analyticsId} data-adsense={adsOn ? SITE.adsense.client : ''}></div>
+    <script>
+      import '../scripts/consent';
+    </script>
+  </>
+)}

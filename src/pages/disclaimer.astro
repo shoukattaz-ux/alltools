@@ -1,0 +1,34 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site';
+---
+<Base title="Disclaimer" description={`${SITE.name} tools and calculators provide general information only. Read about health, financial and file-processing limitations and our advertising and affiliate disclosure.`} breadcrumbs={[{ name: 'Disclaimer', href: '/disclaimer/' }]}>
+  <article class="prose legal">
+    <h1>Disclaimer</h1>
+    <p class="muted">Last updated: {SITE.lastUpdated}</p>
+
+    <h2>General information only</h2>
+    <p>Everything on this Site, including tools, calculators and guides, is provided for general informational purposes. It is not professional advice, and you should not rely on it as a substitute for advice from a qualified professional.</p>
+
+    <h2>Health information (BMI calculator and related guides)</h2>
+    <p>The BMI calculator and the article about BMI are educational. BMI is a screening measure for adults and does not diagnose any condition. It does not account for muscle mass, body composition, age, ethnicity, pregnancy or medical conditions. Speak to a doctor or other qualified health professional about your health and weight. Never delay seeking medical advice because of a result from this Site.</p>
+
+    <h2>Financial information (loan, discount and percentage calculators)</h2>
+    <p>The loan calculator estimates fixed-rate, fully amortising payments under the assumptions stated on its page. It does not include fees, insurance, taxes, variable rates or lender-specific rules, and the results are not an offer, quote or financial advice. Your lender's figures are authoritative. Currency options affect display formatting only, and no exchange-rate conversion is performed. Discount and tax results may differ from a retailer's receipt.</p>
+
+    <h2>Date calculations</h2>
+    <p>The age calculator uses calendar days and standard conventions for month lengths and leap-day birthdays. Legal definitions of age differ by jurisdiction.</p>
+
+    <h2>File tools</h2>
+    <p>The PDF and image tools create new files from your originals. Conversions, compression and cropping can change quality, structure or features (for example, image-based PDF compression removes selectable text). Keep your originals and check outputs before relying on them, especially for legal, medical or official documents. We do not guarantee that every file will be processed correctly.</p>
+
+    <h2>No guarantees</h2>
+    <p>We aim for accuracy but do not guarantee that the Site is error-free, always available, or suitable for your purpose. See the <a href="/terms/">Terms and Conditions</a>.</p>
+
+    <h2>Advertising and affiliate disclosure</h2>
+    <p>This Site may in future display advertising and use affiliate links, which means the operator may earn a commission if you click and buy, at no extra cost to you. Any such content will be clearly labelled. Editorial content and tool behaviour are not influenced by advertisers.</p>
+
+    <h2>External links</h2>
+    <p>Links to other websites are provided for convenience. We do not endorse and are not responsible for their content.</p>
+  </article>
+</Base>

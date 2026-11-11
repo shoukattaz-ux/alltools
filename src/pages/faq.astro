@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import FaqList from '../components/FaqList.astro';
+import { SITE } from '../data/site';
+const sections = [
+  { title: 'Privacy and security', faqs: [
+    { q: 'Are my files uploaded to a server?', a: 'No. The PDF and image tools process files in your browser. There is no upload feature on this site. You can verify this with your browser\'s network inspector, and our guide on online tool safety shows how.' },
+    { q: 'Is anything stored after I close the page?', a: 'No file content or calculator input is stored. Files held in memory are discarded when you close or reload the page. Your downloaded results are saved only where you save them.' },
+    { q: 'Do you use cookies?', a: 'The site itself sets none. Optional analytics or advertising cookies are only used after you consent, if we enable them. See the Cookie Policy.' },
+    { q: 'Do the tools work offline?', a: 'After a tool page has fully loaded, the processing itself does not need an internet connection. Loading the page does.' },
+  ]},
+  { title: 'Using the tools', faqs: [
+    { q: 'Do I need to create an account?', a: 'No. All tools are free to use without registration.' },
+    { q: 'What file sizes are supported?', a: 'Up to 100 MB per PDF and 30 MB per image (10 MB for Base64 encoding), with up to 30 files at once where a tool accepts several. These limits keep your browser from running out of memory.' },
+    { q: 'Which file types are supported?', a: 'PDF for PDF tools; JPG, PNG and WebP for image tools. We check the actual content of each file, not just its extension.' },
+    { q: 'Why did my file fail to process?', a: 'The usual reasons are a password-protected or damaged PDF, a file that is not really the type its name suggests, or a file too large for your device\'s memory. Each tool shows a specific message.' },
+    { q: 'Which browsers are supported?', a: 'Current versions of Chrome, Edge, Firefox and Safari on desktop, Android and iOS. WebP output requires a browser that can encode WebP.' },
+    { q: 'Are the results exact?', a: 'File tools produce real output files. Calculators state their formulas and assumptions on each page; they are estimates for planning and not professional advice.' },
+  ]},
+  { title: 'About the site', faqs: [
+    { q: `How is ${SITE.name} funded?`, a: 'The site is intended to be supported by advertising and, in future, possibly affiliate links, sponsorships or optional premium features. Any advertising will be clearly labelled and kept away from tool controls.' },
+    { q: 'Can I suggest a tool or report a bug?', a: 'Yes, through the contact page. Please do not send confidential files.' },
+    { q: 'Can I advertise or sponsor a placement?', a: 'See the Advertise with us page for how to get in touch.' },
+  ]},
+];
+---
+<Base title="Frequently Asked Questions" description={`Answers about ${SITE.name}: file privacy, supported formats and size limits, cookies, browser support, and how the free tools work.`} breadcrumbs={[{ name: 'FAQ', href: '/faq/' }]}>
+  <h1>Frequently asked questions</h1>
+  <div class="content-block">
+    {sections.map((s) => (<><h2>{s.title}</h2><FaqList faqs={s.faqs} /></>))}
+    <p style="margin-top:28px">Still have a question? <a href="/contact/">Contact us</a>. For specifics on a tool, see its page, or browse <a href="/tools/">all tools</a>.</p>
+  </div>
+</Base>

@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site';
+---
+<Base title="Advertise With Us" description={`Sponsorship and advertising enquiries for ${SITE.name}: our placement standards, what we do and do not accept, and how to get in touch.`} breadcrumbs={[{ name: 'Advertise with us', href: '/advertise/' }]}>
+  <article class="prose">
+    <h1>Advertise with {SITE.name}</h1>
+    <p class="lead">{SITE.name} is a new site. If you offer a product or service relevant to people who work with documents, images or everyday calculations, we are open to discussing sponsorship and advertising.</p>
+
+    <div class="notice notice-info" role="note"><span><strong>Honest about where we are:</strong> we do not publish traffic or audience figures here because we will only quote measured, verifiable numbers. Ask us for current data when you enquire.</span></div>
+
+    <h2>Possible placements</h2>
+    <ul class="ticks">
+      <li>Display ads in clearly separated, labelled areas on guides and below tool instructions.</li>
+      <li>Sidebar placements on tool pages (desktop).</li>
+      <li>Sponsored or affiliate recommendations within relevant guides, always disclosed as such.</li>
+    </ul>
+
+    <h2>Our standards</h2>
+    <ul class="ticks">
+      <li>Ads never appear inside, over or next to the tool buttons and inputs in a way that could cause accidental clicks.</li>
+      <li>Ads are labelled “Advertisement” and do not auto-refresh.</li>
+      <li>No pop-ups, forced redirects, fake system messages, misleading download buttons, or ads that imitate our tools.</li>
+      <li>We do not accept advertising for illegal, deceptive, adult, gambling-related, or malware-prone products, and we may decline any enquiry.</li>
+      <li>Sponsored content is labelled and does not change how a tool works or what our guides recommend.</li>
+      <li>Where consent is required, advertising scripts load only after visitors agree. See our <a href="/cookies/">Cookie Policy</a>.</li>
+    </ul>
+
+    <h2>Programmatic advertising</h2>
+    <p>We plan to use reputable advertising networks, subject to their approval and policies. Approval is decided by each network, and ads may not appear until it is granted.</p>
+
+    <h2>Get in touch</h2>
+    <p>Tell us about your company, your product and what you have in mind via our <a href="/contact/">contact page</a>{SITE.contactEmail ? <> or at <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a></> : <> <span class="todo" data-owner-todo>[OWNER TO COMPLETE: contact email]</span></>}. Choose the topic “Advertising or sponsorship”.</p>
+  </article>
+</Base>
