@@ -1,5 +1,10 @@
-# Optional: only needed for direct uploads with Wrangler (`npm run build && npx wrangler pages deploy`).
-# Git-connected Cloudflare Pages projects are configured in the dashboard instead (see docs/DEPLOYMENT.md).
-name = "toolhaven"                 # change to your Pages project name
-pages_build_output_dir = "./dist"
+# Cloudflare deploy config. The site is 100% static, so it is served as static assets (no Worker code needed).
+# Used by the dashboard "Deploy command": npx wrangler deploy   (build command: npm run build)
+name = "alltools"                 # must match the project name in the Cloudflare dashboard
 compatibility_date = "2026-11-01"
+
+[assets]
+directory = "./dist"
+# Serve dist/404.html with a real 404 status for unknown URLs.
+not_found_handling = "404-page"
+# dist/_headers (CSP, HSTS, caching) is applied automatically by Cloudflare static assets.
