@@ -3,8 +3,10 @@ import Base from '../../layouts/Base.astro';
 import ToolBrowser from '../../components/ToolBrowser.astro';
 import { TOOLS } from '../../data/tools';
 ---
-<Base title="All Free Online Tools: PDF, Image & Calculators" description={`Browse all ${TOOLS.length} free tools: merge, split and compress PDFs, compress, resize, crop and convert images, and BMI, loan, age, percentage and discount calculators.`} breadcrumbs={[{ name: 'All tools', href: '/tools/' }]}>
-  <h1>All tools</h1>
-  <p class="lead">{TOOLS.length} free tools for PDFs, images and everyday calculations. Search, or filter by category.</p>
+<Base title="All Free Online Tools: PDF, Image & Calculators" description={`Browse all ${TOOLS.length} free tools: merge, split, sign and compress PDFs, compress, resize, crop and convert images, and BMI, age, percentage and discount calculators.`} breadcrumbs={[{ name: 'All tools', href: '/tools/' }]}>
+  <Fragment slot="hero">
+    <h1>All tools</h1>
+    <p class="lead">{TOOLS.length} free tools for PDFs, images and everyday calculations. Search, or filter by category.</p>
+  </Fragment>
   <ToolBrowser id="all" autoquery />
 </Base>

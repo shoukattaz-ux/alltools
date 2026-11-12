@@ -1,16 +1,19 @@
 ---
 import Icon from './Icon.astro';
-import { toolUrl, type Tool, CATEGORIES } from '../data/tools';
+import { toolUrl, type Tool } from '../data/tools';
 interface Props { tool: Tool }
 const { tool } = Astro.props;
 ---
 <li class="card tool-card" data-category={tool.category} data-search={`${tool.name} ${tool.short} ${tool.search}`.toLowerCase()}>
   <a href={toolUrl(tool)} class="card-link">
-    <span class={`tool-icon cat-${tool.category}`}><Icon name={tool.icon} size={24} /></span>
+    <span class="card-top">
+      <span class={`tool-icon cat-${tool.category}`}><Icon name={tool.icon} /></span>
+      <span class="go" aria-hidden="true"><Icon name="arrow" size={16} /></span>
+    </span>
     <span class="card-body">
       <span class="card-title">{tool.name}</span>
       <span class="card-text">{tool.short}</span>
-      <span class="card-meta">{CATEGORIES[tool.category].name}{tool.local ? ' · Runs in your browser' : ''}</span>
+      <span class="card-meta"><Icon name={tool.local ? 'lock' : 'zap'} />{tool.local ? 'Runs in your browser' : 'Instant results'}</span>
     </span>
   </a>
 </li>

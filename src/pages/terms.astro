@@ -3,9 +3,11 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
 ---
 <Base title="Terms and Conditions" description={`The terms for using ${SITE.name}: acceptable use, no-warranty provisions for our free tools and calculators, intellectual property and limitation of liability.`} breadcrumbs={[{ name: 'Terms and conditions', href: '/terms/' }]}>
-  <article class="prose legal">
+  <Fragment slot="hero">
     <h1>Terms and Conditions</h1>
     <p class="muted">Last updated: {SITE.lastUpdated}</p>
+  </Fragment>
+  <article class="prose legal">
     <p>By using {SITE.name} (the “Site”), you agree to these terms. If you do not agree, please do not use the Site.</p>
 
     <h2>1. The service</h2>

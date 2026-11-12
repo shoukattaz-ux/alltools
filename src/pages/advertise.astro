@@ -3,9 +3,11 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
 ---
 <Base title="Advertise With Us" description={`Sponsorship and advertising enquiries for ${SITE.name}: our placement standards, what we do and do not accept, and how to get in touch.`} breadcrumbs={[{ name: 'Advertise with us', href: '/advertise/' }]}>
-  <article class="prose">
+  <Fragment slot="hero">
     <h1>Advertise with {SITE.name}</h1>
     <p class="lead">{SITE.name} is a new site. If you offer a product or service relevant to people who work with documents, images or everyday calculations, we are open to discussing sponsorship and advertising.</p>
+  </Fragment>
+  <article class="prose">
 
     <div class="notice notice-info" role="note"><span><strong>Honest about where we are:</strong> we do not publish traffic or audience figures here because we will only quote measured, verifiable numbers. Ask us for current data when you enquire.</span></div>
 

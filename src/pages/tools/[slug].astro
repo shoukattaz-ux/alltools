@@ -11,64 +11,72 @@ const { tool } = Astro.props;
 const cat = CATEGORIES[tool.category];
 const related = tool.related.map((s) => toolBySlug(s)!).filter(Boolean);
 const guides = (await getCollection('blog')).filter((p) => p.data.tools.includes(tool.slug)).slice(0, 3);
+const catLabel = cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase());
 ---
-<Base title={tool.seoTitle} description={tool.metaDescription} breadcrumbs={[{ name: cat.name, href: cat.path }, { name: tool.name, href: toolUrl(tool) }]} wide>
-  <div class="tool-head">
+<Base bleed heroClass="tall" title={tool.seoTitle} description={tool.metaDescription} breadcrumbs={[{ name: cat.name, href: cat.path }, { name: tool.name, href: toolUrl(tool) }]}>
+  <Fragment slot="hero">
+    <div class="hero-meta" style="margin:0 0 14px">
+      <span class="privacy-pill" style="margin:0"><Icon name="shield" size={17} />{tool.local ? 'Processed in your browser. Your files are not uploaded.' : 'Calculated in your browser. Nothing you enter is stored or sent.'}</span>
+    </div>
     <h1>{tool.h1}</h1>
-    <p class="privacy-pill"><Icon name="shield" size={18} />{tool.local ? 'Processed in your browser. Your files are not uploaded.' : 'Calculated in your browser. Nothing you enter is stored or sent.'}</p>
     <p class="lead">{tool.intro}</p>
-  </div>
+  </Fragment>
 
-  <div class="tool-panel">
-    <div id="tool-root" data-tool={tool.slug} aria-busy="true" aria-live="polite" style={`min-height:${TOOL_UI_HEIGHT[tool.slug] ?? 120}px`}>
-      <p class="muted">Loading tool…</p>
-    </div>
-    <noscript><div class="notice notice-warn">This tool needs JavaScript, because it runs in your browser. Please enable JavaScript to use it.</div></noscript>
-  </div>
-  <script>
-    import '../../scripts/tool-loader';
-  </script>
-
-  <div class="tool-layout section">
-    <div class="content-block">
-      <h2>How to use the {tool.name}</h2>
-      <ol class="steps">{tool.steps.map((s) => <li>{s}</li>)}</ol>
-
-      <AdSlot placement="tool-below-instructions" />
-
-      <h2>Key features</h2>
-      <ul class="ticks">{tool.features.map((f) => <li>{f}</li>)}</ul>
-
-      <h2>Practical examples</h2>
-      {tool.examples.map((e) => <div class="example"><h3>{e.title}</h3><p>{e.body}</p></div>)}
-
-      {tool.limits && (
-        <div class="note-box">
-          <h2>Good to know</h2>
-          <ul>{tool.limits.map((l) => <li>{l}</li>)}</ul>
-        </div>
-      )}
-
-      <AdSlot placement="tool-between-sections" />
-
-      <h2>Frequently asked questions</h2>
-      <FaqList faqs={tool.faqs} />
-
-      {guides.length > 0 && (
-        <>
-          <h2>Related guides</h2>
-          <ul>{guides.map((g) => <li><a href={`/blog/${g.id}/`}>{g.data.title}</a></li>)}</ul>
-        </>
-      )}
-    </div>
-
-    <aside class="sidebar" aria-label="Related">
-      <div class="side-box">
-        <h2>Related tools</h2>
-        <ul>{related.map((r) => <li><a href={toolUrl(r)}>{r.name}</a></li>)}</ul>
-        <p style="margin:8px 0 0"><a href={cat.path}>All {cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase())} →</a></p>
+  <div class="container tool-wrap">
+    <div class="tool-panel">
+      <div id="tool-root" data-tool={tool.slug} aria-busy="true" aria-live="polite" style={`min-height:${TOOL_UI_HEIGHT[tool.slug] ?? 120}px`}>
+        <div class="tool-skeleton" aria-hidden="true"><div class="sk" style="height:96px"></div><div class="sk" style="height:44px;width:44%"></div></div>
+        <span class="sr-only">Loading tool…</span>
       </div>
-      <AdSlot placement="sidebar" />
-    </aside>
+      <noscript><div class="notice notice-warn">This tool needs JavaScript, because it runs in your browser. Please enable JavaScript to use it.</div></noscript>
+    </div>
+    <script>
+      import '../../scripts/tool-loader';
+    </script>
+  </div>
+
+  <div class="container">
+    <div class="tool-layout section">
+      <div class="content-block">
+        <h2>How to use the {tool.name}</h2>
+        <ol class="steps">{tool.steps.map((s) => <li>{s}</li>)}</ol>
+
+        <AdSlot placement="tool-below-instructions" />
+
+        <h2>Key features</h2>
+        <ul class="ticks">{tool.features.map((f) => <li>{f}</li>)}</ul>
+
+        <h2>Practical examples</h2>
+        {tool.examples.map((e) => <div class="example"><h3>{e.title}</h3><p>{e.body}</p></div>)}
+
+        {tool.limits && (
+          <div class="note-box">
+            <h2>Good to know</h2>
+            <ul>{tool.limits.map((l) => <li>{l}</li>)}</ul>
+          </div>
+        )}
+
+        <AdSlot placement="tool-between-sections" />
+
+        <h2>Frequently asked questions</h2>
+        <FaqList faqs={tool.faqs} />
+
+        {guides.length > 0 && (
+          <>
+            <h2>Related guides</h2>
+            <ul>{guides.map((g) => <li><a href={`/blog/${g.id}/`}>{g.data.title}</a></li>)}</ul>
+          </>
+        )}
+      </div>
+
+      <aside class="sidebar" aria-label="Related">
+        <div class="side-box">
+          <h2>Related tools</h2>
+          <ul>{related.map((r) => <li><a href={toolUrl(r)}><span class={`mini-icon cat-${r.category}`}><Icon name={r.icon} /></span>{r.name}</a></li>)}</ul>
+          <a class="side-more" href={cat.path}>All {catLabel} <Icon name="arrow" size={15} /></a>
+        </div>
+        <AdSlot placement="sidebar" />
+      </aside>
+    </div>
   </div>
 </Base>

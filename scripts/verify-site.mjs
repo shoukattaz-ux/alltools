@@ -47,7 +47,7 @@ for (const f of pages) {
   }
   for (const m of html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="(\/[^"]+)"/g)) if (!urlExists(m[1])) err(url, `missing asset ${m[1]}`);
   for (const m of html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)) { try { JSON.parse(m[1]); } catch { err(url, 'invalid JSON-LD'); } }
-  if (/<script(?![^>]*(?:src=|type="application\/ld\+json"))[^>]*>[^<]/.test(html)) err(url, 'inline script found (breaks strict CSP)');
+  if (/<script(?![^>]*(?:src=|type="application\/(?:ld\+)?json"))[^>]*>[^<]/.test(html)) err(url, 'inline script found (breaks strict CSP)');
   ownerTodos += (html.match(/data-owner-todo/g) || []).length;
 }
 for (const [k, v] of titles) if (v.length > 1) err(v.join(', '), `duplicate title "${k}"`);

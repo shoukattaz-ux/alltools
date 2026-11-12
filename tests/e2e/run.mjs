@@ -78,7 +78,7 @@ const test = (name, fn) => tests.push({ name, fn });
 
 test('all pages load with 200, no console errors, CSP respected', async () => {
   const urls = ['/', '/tools/', '/pdf-tools/', '/image-tools/', '/calculators/', '/blog/', '/about/', '/contact/', '/privacy/', '/terms/', '/disclaimer/', '/cookies/', '/faq/', '/advertise/'];
-  const tools = ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator'];
+  const tools = ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator'];
   for (const t of tools) urls.push(`/tools/${t}/`);
   const html = readFileSync(resolve(here, '../../dist/sitemap-0.xml'), 'utf8');
   for (const m of html.matchAll(/\/blog\/([a-z0-9-]+)\//g)) urls.push(`/blog/${m[1]}/`);
@@ -103,31 +103,74 @@ test('all pages load with 200, no console errors, CSP respected', async () => {
   await page.close();
 });
 
-test('homepage search and category filters work instantly', async () => {
+test('homepage hero search shows instant suggestions; directory search and category filters work', async () => {
   const page = await newPage();
   await page.goto(base + '/');
+  assert.equal(await page.locator('.hero-grid h1').innerText().then((t) => t.replace(/\s+/g, ' ')), 'Powerful online tools. Simple solutions.');
+  const sugg = page.locator('[data-suggest] a');
+  assert.ok(await page.locator('[data-suggest]').isHidden());
+  await page.fill('#hero-q', 'merge');
+  assert.equal(await sugg.count(), 1);
+  assert.match(await sugg.first().innerText(), /PDF Merger/);
+  await page.fill('#hero-q', 'jpg to png');
+  assert.ok(await sugg.count() >= 1);
+  await page.fill('#hero-q', 'zzzz');
+  assert.equal(await sugg.count(), 0);
+  await page.getByText(/No tools match/).waitFor();
+  await page.fill('#hero-q', 'pdf');
+  assert.ok(await sugg.count() >= 5);
+  await page.keyboard.press('ArrowDown');
+  assert.equal(await page.evaluate(() => document.activeElement.tagName), 'A');
+  await page.keyboard.press('Escape');
+  assert.ok(await page.locator('[data-suggest]').isHidden());
+  await page.fill('#hero-q', 'bmi');
+  await page.keyboard.press('Enter');
+  await page.waitForURL('**/tools/bmi-calculator/');
+  // popular tools and categories on the homepage
+  await page.goto(base + '/');
+  assert.equal(await page.locator('#popular ~ .grid .tool-card, .section .grid .tool-card').count(), 8);
+  assert.equal(await page.locator('.cat-card').count(), 3);
+  // directory page: search + chips
+  await page.goto(base + '/tools/');
   const visible = () => page.locator('.tool-card:visible').count();
-  assert.equal(await visible(), 16);
+  assert.equal(await visible(), 15);
   await page.fill('[data-search-input]', 'loan');
-  assert.equal(await visible(), 1);
-  await page.fill('[data-search-input]', 'jpg to png');
-  assert.ok(await visible() >= 1);
-  await page.fill('[data-search-input]', 'zzzz');
   assert.equal(await visible(), 0);
-  assert.ok(await page.locator('[data-empty]').isVisible());
+  await page.fill('[data-search-input]', 'resize');
+  assert.equal(await visible(), 1);
   await page.fill('[data-search-input]', '');
   await page.getByRole('button', { name: 'Calculators' }).click();
-  assert.equal(await visible(), 5);
+  assert.equal(await visible(), 4);
   await page.getByRole('button', { name: 'PDF tools' }).click();
   assert.equal(await visible(), 6);
+  await page.getByRole('button', { name: 'Image tools' }).click();
+  assert.equal(await visible(), 5);
   await page.goto(base + '/tools/?q=resize');
   assert.equal(await page.locator('.tool-card:visible').count(), 1);
+});
+
+test('Loan Calculator is gone everywhere (404, no links, not in sitemap or search), other calculators remain', async () => {
+  const page = await newPage();
+  const res = await page.goto(base + '/tools/loan-calculator/');
+  assert.equal(res.status(), 404);
+  problems = problems.filter((p) => !/status of 404/.test(p));
+  for (const u of ['/', '/tools/', '/calculators/', '/blog/']) {
+    await page.goto(base + u);
+    const html = await page.content();
+    assert.ok(!/loan/i.test(await page.locator('main').innerText()), `${u} mentions a loan in main content`);
+    assert.ok(!html.includes('loan-calculator'), `${u} links to the loan calculator`);
+  }
+  const sm = readFileSync(resolve(here, '../../dist/sitemap-0.xml'), 'utf8');
+  assert.ok(!/loan/i.test(sm));
+  assert.equal((await page.goto(base + '/calculators/')).status(), 200);
+  assert.equal(await page.locator('.tool-card').count(), 4);
+  for (const t of ['bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator']) assert.equal((await page.goto(`${base}/tools/${t}/`)).status(), 200);
 });
 
 test('mobile layout: no horizontal overflow, nav menu works', async () => {
   const mobile = await browser.newContext({ viewport: { width: 375, height: 800 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await mobile.newPage();
-  for (const u of ['/', '/tools/', '/tools/merge-pdf/', '/tools/loan-calculator/', '/tools/image-cropper/', '/blog/how-loan-payments-are-calculated/', '/privacy/']) {
+  for (const u of ['/', '/tools/', '/tools/merge-pdf/', '/tools/discount-calculator/', '/tools/image-cropper/', '/blog/jpg-vs-png-vs-webp/', '/privacy/']) {
     await page.goto(base + u, { waitUntil: 'networkidle' });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     assert.ok(overflow <= 1, `${u} overflows by ${overflow}px`);
@@ -488,25 +531,6 @@ test('Age calculator', async () => {
   await root(page).getByText(/must not be after/).waitFor();
 });
 
-test('Loan calculator', async () => {
-  const page = await openTool('loan-calculator');
-  const t = await root(page).innerText();
-  assert.match(t, /\$495\.03/); assert.match(t, /\$4,701\.80/);
-  assert.equal(await root(page).locator('tbody tr').count(), 5);
-  await page.getByLabel('Display currency').selectOption('GBP');
-  assert.match(await root(page).innerText(), /£495\.03/);
-  await page.getByLabel('Annual interest rate (%)').fill('0');
-  await page.getByLabel('Loan amount').fill('12000');
-  await page.getByLabel('Term: years').fill('1');
-  assert.match(await root(page).innerText(), /£1,000\.00/);
-  await page.getByLabel('Loan amount').fill('-5');
-  await btn(page, 'Calculate').click();
-  await root(page).getByText(/greater than zero/).waitFor();
-  await page.getByLabel('Loan amount').fill('100000'); await page.getByLabel('Annual interest rate (%)').fill('6');
-  await page.getByLabel('Term: years').fill('30');
-  assert.match(await root(page).innerText(), /£599\.55/);
-});
-
 test('Discount calculator', async () => {
   const page = await openTool('discount-calculator');
   assert.match(await root(page).innerText(), /\$80\.00/);
@@ -542,7 +566,7 @@ test('accessibility: axe-core finds no violations on key pages and every tool', 
   const axeSrc = readFileSync(resolve(here, '../../node_modules/axe-core/axe.min.js'), 'utf8');
   const page = await newPage();
   const urls = ['/', '/tools/', '/pdf-tools/', '/blog/', '/blog/jpg-vs-png-vs-webp/', '/about/', '/contact/', '/privacy/', '/faq/', '/advertise/'];
-  for (const t of ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'loan-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
+  for (const t of ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
   const bad = [];
   for (const u of urls) {
     await page.goto(base + u, { waitUntil: 'networkidle' });

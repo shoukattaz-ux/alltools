@@ -1,18 +1,18 @@
 # ToolHaven: free PDF, image & calculator tools
 
-A static, privacy-first tools website. **All 16 tools run in the visitor's browser**: files are never uploaded, and there is no backend to run, secure or pay for. Built with [Astro](https://astro.build) and TypeScript, designed for Cloudflare Pages.
+A static, privacy-first tools website. **All 15 tools run in the visitor's browser**: files are never uploaded, and there is no backend to run, secure or pay for. Built with [Astro](https://astro.build) and TypeScript, designed for Cloudflare Pages.
 
 "ToolHaven" is a placeholder brand: change `SITE.name` in `src/data/site.ts` and every page follows.
 
-## The 16 tools
+## The 15 tools
 
 | Category | Tools (URL) |
 | --- | --- |
 | PDF | Merge (`/tools/merge-pdf/`), Sign (`/tools/sign-pdf/`), Split (`/tools/split-pdf/`), Compress (`/tools/compress-pdf/`), PDF to image (`/tools/pdf-to-image/`), Image to PDF (`/tools/image-to-pdf/`) |
 | Image | Compress (`/tools/image-compressor/`), Resize (`/tools/image-resizer/`), Crop (`/tools/image-cropper/`), Convert format (`/tools/image-converter/`), Image to Base64 (`/tools/image-to-base64/`) |
-| Calculators | BMI (`/tools/bmi-calculator/`), Percentage (`/tools/percentage-calculator/`), Age (`/tools/age-calculator/`), Loan (`/tools/loan-calculator/`), Discount (`/tools/discount-calculator/`) |
+| Calculators | BMI (`/tools/bmi-calculator/`), Percentage (`/tools/percentage-calculator/`), Age (`/tools/age-calculator/`), Discount (`/tools/discount-calculator/`) |
 
-Plus: homepage with instant search and category filters, category pages, tools directory, blog with 11 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (42 HTML pages in total).
+Plus: homepage with instant search and category filters, category pages, tools directory, blog with 10 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (40 HTML pages in total).
 
 ## Commands
 
@@ -23,7 +23,7 @@ npm run build        # production build into dist/
 npm run preview      # serve dist/ locally
 npm run check        # TypeScript / Astro type check
 npm run lint         # ESLint
-npm test             # 88 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
+npm test             # 83 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
 npm run verify       # post-build checks: SEO tags, links, sitemap, headings, inline scripts
 npm run test:e2e     # 28 real-browser tests of every tool + a11y (axe-core); run after build
 npm run test:cls     # layout-shift measurement of all tool pages
@@ -39,14 +39,14 @@ src/
   data/site.ts        brand, URLs, contact, operator placeholders, analytics/ads flags
   data/tools.ts       all tool content (titles, steps, FAQs...) + categories
   data/ads.ts         ad placements (all empty = no ads)
-  content/blog/*.md   the 11 guides (schema in src/content.config.ts)
+  content/blog/*.md   the 10 guides (schema in src/content.config.ts)
   layouts/Base.astro  <head> SEO, JSON-LD, header/footer, consent
-  components/         Header, Footer, ToolCard, ToolBrowser, AdSlot, AffiliateLink, ConsentBanner, FaqList, Breadcrumbs, Icon
+  components/         Header (mega-menu), Footer, Logo, HeroSearch (instant suggestions), ToolCard, ToolBrowser, AdSlot, AffiliateLink, ConsentBanner, FaqList, Breadcrumbs, Icon
   pages/              index, tools/[slug], blog/[slug], category pages, legal pages, 404, robots.txt
   lib/                pure, unit-tested logic: calc.ts, pageRange.ts, files.ts (magic-byte validation), format.ts
   scripts/ui.ts, pdf.ts, calc-ui.ts   shared client helpers
   scripts/tools/*.ts  one code-split module per tool (loaded only on that tool's page)
-  styles/global.css   the design system (tokens, components)
+  styles/global.css   the design system (tokens, header/mega-menu, hero, cards, upload area, notices, tool UI)
 public/               _headers (CSP + security headers), favicon, og-image.png
 scripts/              copy-pdfjs-assets, verify-site, make-og-image
 tests/unit, tests/e2e Vitest + Playwright
@@ -55,7 +55,11 @@ docs/                 DEPLOYMENT, ADVERTISING, LAUNCH-CHECKLIST
 
 ## Technology
 
-Astro 7 (static output), TypeScript, hand-written CSS (system font stack: no font downloads), [pdf-lib](https://pdf-lib.js.org) (merge/split/build PDFs), [pdf.js](https://mozilla.github.io/pdf.js/) legacy build (rendering pages), [JSZip](https://stuk.github.io/jszip/) (ZIP downloads), the browser Canvas API (images), `@astrojs/sitemap`. Dev: Vitest, ESLint, Playwright, axe-core.
+Astro 7 (static output), TypeScript, hand-written CSS with self-hosted Inter Variable (Latin subsets only, preloaded), [pdf-lib](https://pdf-lib.js.org) (merge/split/build PDFs), [pdf.js](https://mozilla.github.io/pdf.js/) legacy build (rendering pages), [JSZip](https://stuk.github.io/jszip/) (ZIP downloads), the browser Canvas API (images), `@astrojs/sitemap`. Dev: Vitest, ESLint, Playwright, axe-core.
+
+## Design system
+
+Premium-SaaS look: indigo brand with teal accent, Inter typography, layered shadows, gradient hero bands, category colour coding (PDF rose, Image teal, Calculators amber), upload area with drag-and-drop states, icon-based notices, skeleton loading and a mega-menu. All tokens live at the top of `src/styles/global.css`. Animations are lightweight CSS and are disabled for visitors who prefer reduced motion.
 
 ## Key design decisions
 

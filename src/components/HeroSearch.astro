@@ -1,0 +1,20 @@
+---
+/** Prominent hero search with instant suggestions. Without JS it submits to /tools/?q=… */
+import Icon from './Icon.astro';
+import { TOOLS, toolUrl } from '../data/tools';
+const data = TOOLS.map((t) => ({ n: t.name, s: t.short, u: toolUrl(t), c: t.category, i: t.icon, k: `${t.name} ${t.short} ${t.search}`.toLowerCase() }));
+---
+<div class="search search-lg" data-hero-search>
+  <form role="search" action="/tools/" method="get">
+    <label for="hero-q" class="sr-only">Search all tools</label>
+    <Icon name="search" size={22} class="search-icon" />
+    <input id="hero-q" name="q" type="search" placeholder="Search tools, e.g. merge pdf" autocomplete="off" spellcheck="false" data-hero-input />
+  </form>
+  <div class="suggest" id="hero-suggest" hidden data-suggest></div>
+  <p class="sr-only" role="status" aria-live="polite" data-suggest-count></p>
+  <script type="application/json" id="tool-index" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+  <div class="try-line">Popular: <a href="/tools/merge-pdf/">Merge PDF</a> <a href="/tools/sign-pdf/">Sign PDF</a> <a href="/tools/compress-pdf/">Compress PDF</a> <a href="/tools/image-resizer/">Resize image</a></div>
+</div>
+<script>
+  import '../scripts/hero-search';
+</script>

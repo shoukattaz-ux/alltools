@@ -124,35 +124,6 @@ export function calcAge(dob: YMD, on: YMD): Result<AgeResult> {
   });
 }
 
-/* ----------------------------------- Loan ---------------------------------- */
-
-export interface LoanYear { year: number; principalPaid: number; interestPaid: number; endBalance: number }
-export interface LoanResult { monthlyPayment: number; totalPayment: number; totalInterest: number; months: number; schedule: LoanYear[] }
-
-export function calcLoan(principal: number, annualRatePct: number, months: number): Result<LoanResult> {
-  if (!finite(principal) || !finite(annualRatePct) || !finite(months)) return fail('Enter the loan amount, interest rate and term.');
-  if (principal <= 0) return fail('The loan amount must be greater than zero.');
-  if (principal > 1e10) return fail('The loan amount is too large to calculate.');
-  if (annualRatePct < 0 || annualRatePct > 100) return fail('The interest rate must be between 0% and 100%.');
-  if (!Number.isInteger(months) || months < 1 || months > 1200) return fail('The term must be between 1 and 1,200 months (100 years).');
-  const r = annualRatePct / 100 / 12;
-  const payment = r === 0 ? principal / months : (principal * r) / (1 - Math.pow(1 + r, -months));
-  const schedule: LoanYear[] = [];
-  let balance = principal, yp = 0, yi = 0;
-  for (let i = 1; i <= months; i++) {
-    const interest = balance * r;
-    const princ = i === months ? balance : payment - interest;
-    balance = Math.max(0, balance - princ);
-    yp += princ; yi += interest;
-    if (i % 12 === 0 || i === months) {
-      schedule.push({ year: Math.ceil(i / 12), principalPaid: yp, interestPaid: yi, endBalance: balance < 0.005 ? 0 : balance });
-      yp = 0; yi = 0;
-    }
-  }
-  const totalPayment = payment * months;
-  return ok({ monthlyPayment: payment, totalPayment, totalInterest: totalPayment - principal, months, schedule });
-}
-
 /* --------------------------------- Discount -------------------------------- */
 
 export interface DiscountResult { original: number; afterFirst: number; afterSecond: number; saved: number; savedPct: number; taxAmount: number; final: number }

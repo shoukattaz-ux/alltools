@@ -5,9 +5,11 @@ const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
 const gaOn = !!SITE.analyticsId;
 ---
 <Base title="Cookie Policy" description={`Which cookies and similar technologies ${SITE.name} uses: none by default, with optional analytics or advertising only after you give consent.`} breadcrumbs={[{ name: 'Cookie policy', href: '/cookies/' }]}>
-  <article class="prose legal">
+  <Fragment slot="hero">
     <h1>Cookie Policy</h1>
     <p class="muted">Last updated: {SITE.lastUpdated}</p>
+  </Fragment>
+  <article class="prose legal">
     <p>Cookies are small text files stored by your browser. Similar technologies include local storage. This page lists what {SITE.name} uses.</p>
 
     <h2>Strictly necessary</h2>

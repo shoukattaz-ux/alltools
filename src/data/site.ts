@@ -7,7 +7,7 @@ const env = import.meta.env;
 export const SITE = {
   name: 'ToolHaven',
   tagline: 'Free online PDF, image and calculator tools',
-  description: 'Free PDF, image and calculator tools that run in your browser. Merge, compress and convert files, or work out loans and BMI. Your files never leave your device.',
+  description: 'Free online PDF, image and calculator tools that run in your browser. Merge, sign, compress and convert files. Your files never leave your device.',
   /** Canonical origin. Set SITE_URL at build time; the fallback is a non-resolving placeholder. */
   url: ((env.SITE_URL as string | undefined) || 'https://toolhaven.example').replace(/\/+$/, ''),
   locale: 'en',

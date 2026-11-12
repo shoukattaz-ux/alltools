@@ -88,31 +88,6 @@ describe('Age', () => {
   it('rejects future dob', () => expect(c.calcAge(d(2030, 1, 1), d(2024, 1, 1)).ok).toBe(false));
 });
 
-describe('Loan', () => {
-  it('standard 30-year mortgage', () => {
-    const r = val(c.calcLoan(200000, 6, 360));
-    expect(r.monthlyPayment).toBeCloseTo(1199.1, 1);
-    expect(r.totalInterest).toBeCloseTo(231676.38, 0);
-    expect(r.schedule).toHaveLength(30);
-    expect(r.schedule[29].endBalance).toBe(0);
-    const principal = r.schedule.reduce((s, y) => s + y.principalPaid, 0);
-    expect(principal).toBeCloseTo(200000, 4);
-  });
-  it('zero interest', () => {
-    const r = val(c.calcLoan(12000, 0, 12));
-    expect(r.monthlyPayment).toBe(1000);
-    expect(r.totalInterest).toBe(0);
-  });
-  it('partial final year', () => expect(val(c.calcLoan(5000, 5, 18)).schedule).toHaveLength(2));
-  it('validation', () => {
-    expect(c.calcLoan(0, 5, 12).ok).toBe(false);
-    expect(c.calcLoan(1000, -1, 12).ok).toBe(false);
-    expect(c.calcLoan(1000, 5, 0).ok).toBe(false);
-    expect(c.calcLoan(1000, 5, 12.5).ok).toBe(false);
-    expect(c.calcLoan(NaN, 5, 12).ok).toBe(false);
-  });
-});
-
 describe('Discount', () => {
   it('single discount', () => {
     const r = val(c.calcDiscount(80, 25));

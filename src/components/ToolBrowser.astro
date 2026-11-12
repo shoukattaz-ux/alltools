@@ -1,18 +1,20 @@
 ---
-/** Search box + category filter + tool grid. Works without JS (all tools listed); JS adds instant filtering. */
+/** Search box + category filter + tool grid (directory pages). Works without JS (all tools listed); JS adds instant filtering. */
 import ToolCard from './ToolCard.astro';
 import Icon from './Icon.astro';
 import { TOOLS, CATEGORIES, type Category } from '../data/tools';
-interface Props { id?: string; category?: Category; showFilters?: boolean; autoquery?: boolean }
-const { id = 'browser', category, showFilters = true, autoquery = false } = Astro.props;
+interface Props { id?: string; category?: Category; showFilters?: boolean; autoquery?: boolean; showSearch?: boolean }
+const { id = 'browser', category, showFilters = true, autoquery = false, showSearch = true } = Astro.props;
 const list = category ? TOOLS.filter((t) => t.category === category) : TOOLS;
 ---
-<div class="browser" data-browser data-autoquery={autoquery ? "" : undefined}>
-  <form class="search" role="search" action="/tools/" method="get" data-search-form>
-    <label for={`${id}-q`} class="sr-only">Search tools</label>
-    <Icon name="search" size={20} class="search-icon" />
-    <input id={`${id}-q`} name="q" type="search" placeholder="Search tools, e.g. “merge pdf”, “resize”, “loan”" autocomplete="off" spellcheck="false" data-search-input />
-  </form>
+<div class="browser" data-browser data-autoquery={autoquery ? '' : undefined}>
+  {showSearch && (
+    <form class="search" role="search" action="/tools/" method="get" data-search-form>
+      <label for={`${id}-q`} class="sr-only">Search tools</label>
+      <Icon name="search" size={20} class="search-icon" />
+      <input id={`${id}-q`} name="q" type="search" placeholder="Search tools, e.g. “merge pdf”, “resize”, “bmi”" autocomplete="off" spellcheck="false" data-search-input />
+    </form>
+  )}
   {showFilters && (
     <div class="chips" role="group" aria-label="Filter by category" data-chips>
       <button type="button" class="chip" aria-pressed="true" data-filter="all">All</button>
@@ -25,7 +27,7 @@ const list = category ? TOOLS.filter((t) => t.category === category) : TOOLS;
   <ul class="grid" data-grid>
     {list.map((t) => <ToolCard tool={t} />)}
   </ul>
-  <p class="empty" hidden data-empty>No tools match your search. Try a shorter word such as “pdf”, “image” or “loan”.</p>
+  <div class="empty" hidden data-empty><strong>No tools match your search</strong>Try a shorter word such as “pdf”, “image” or “bmi”.</div>
 </div>
 <script>
   import '../scripts/browser';

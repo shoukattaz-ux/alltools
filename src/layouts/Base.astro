@@ -1,4 +1,5 @@
 ---
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -15,9 +16,13 @@ interface Props {
   ogType?: 'website' | 'article';
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
-  wide?: boolean;
+  /** Full-bleed page: the page supplies its own container/sections (homepage). */
+  bleed?: boolean;
+  /** Extra class for the hero band, e.g. "tall" on tool pages so the tool card can overlap it. */
+  heroClass?: string;
 }
-const { title, description, rawTitle = false, breadcrumbs, ogType = 'website', noindex = false, jsonLd = [], wide = false } = Astro.props;
+const { title, description, rawTitle = false, breadcrumbs, ogType = 'website', noindex = false, jsonLd = [], bleed = false, heroClass = '' } = Astro.props;
+const hasHero = Astro.slots.has('hero');
 const fullTitle = rawTitle ? title : `${title} | ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
 const ogImage = `${SITE.url}/og-image.png`;
@@ -40,8 +45,9 @@ const allLd = [...orgLd, ...(crumbLd ? [crumbLd] : []), ...jsonLd];
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, follow" />}
-    <meta name="theme-color" content="#0f2a4d" />
+    <meta name="theme-color" content="#3b2fd0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={fullTitle} />
@@ -61,9 +67,21 @@ const allLd = [...orgLd, ...(crumbLd ? [crumbLd] : []), ...jsonLd];
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <Header />
-    <main id="main" class={wide ? 'container wide' : 'container'}>
-      {crumbs && <Breadcrumbs items={crumbs} />}
-      <slot />
+    <main id="main">
+      {hasHero && (
+        <div class={`page-hero ${heroClass}`}>
+          <div class="container">
+            {crumbs && <Breadcrumbs items={crumbs} />}
+            <slot name="hero" />
+          </div>
+        </div>
+      )}
+      {bleed ? <slot /> : (
+        <div class="container page">
+          {!hasHero && crumbs && <Breadcrumbs items={crumbs} />}
+          <slot />
+        </div>
+      )}
     </main>
     <Footer />
     <ConsentBanner />

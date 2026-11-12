@@ -4,9 +4,9 @@ import { TOOLS, TOOL_UI_HEIGHT, CATEGORIES } from '../../src/data/tools';
 import { AD_SLOTS } from '../../src/data/ads';
 
 describe('tool definitions (SEO + completeness)', () => {
-  it('has the 16 tools: 6 PDF, 5 image, 5 calculators', () => {
-    expect(TOOLS).toHaveLength(16);
-    for (const [c, n] of [['pdf', 6], ['image', 5], ['calculator', 5]] as const) expect(TOOLS.filter((t) => t.category === c)).toHaveLength(n);
+  it('has the 15 tools: 6 PDF, 5 image, 4 calculators (Loan Calculator was removed)', () => {
+    expect(TOOLS).toHaveLength(15);
+    for (const [c, n] of [['pdf', 6], ['image', 5], ['calculator', 4]] as const) expect(TOOLS.filter((t) => t.category === c)).toHaveLength(n);
     expect(Object.keys(CATEGORIES)).toHaveLength(3);
   });
   it('has unique slugs, titles, descriptions and H1s', () => {
@@ -35,10 +35,10 @@ describe('tool definitions (SEO + completeness)', () => {
 
 describe('blog content', () => {
   const files = readdirSync('src/content/blog').filter((f) => f.endsWith('.md'));
-  it('has 11 articles with unique titles', () => {
-    expect(files).toHaveLength(11);
+  it('has 10 articles with unique titles', () => {
+    expect(files).toHaveLength(10);
     const titles = files.map((f) => /^title: "(.*)"$/m.exec(readFileSync(`src/content/blog/${f}`, 'utf8'))![1]);
-    expect(new Set(titles).size).toBe(11);
+    expect(new Set(titles).size).toBe(10);
   });
   it.each(files)('%s links to real tools and has a FAQ', (f) => {
     const text = readFileSync(`src/content/blog/${f}`, 'utf8');
@@ -47,6 +47,15 @@ describe('blog content', () => {
     expect(text).toMatch(/^## FAQ/m);
     expect(text.split(/\s+/).length).toBeGreaterThan(350);
     expect(text).toMatch(/^## /m);
+  });
+});
+
+describe('removed content', () => {
+  it('has no Loan Calculator anywhere in the site source', () => {
+    expect(TOOLS.some((t) => /loan/i.test(t.slug + t.name))).toBe(false);
+    expect(existsSync('src/scripts/tools/loan-calculator.ts')).toBe(false);
+    const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`]));
+    for (const f of walk('src')) expect(readFileSync(f, 'utf8'), f).not.toMatch(/loan[- ]calculator|calcLoan|how-loan-payments/i);
   });
 });
 

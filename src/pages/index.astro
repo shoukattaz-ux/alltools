@@ -1,76 +1,175 @@
 ---
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
-import ToolBrowser from '../components/ToolBrowser.astro';
+import HeroSearch from '../components/HeroSearch.astro';
+import ToolCard from '../components/ToolCard.astro';
 import AdSlot from '../components/AdSlot.astro';
 import FaqList from '../components/FaqList.astro';
 import { SITE } from '../data/site';
-import { CATEGORIES, TOOLS, type Category } from '../data/tools';
+import { CATEGORIES, TOOLS, toolBySlug, type Category } from '../data/tools';
 import { getCollection } from 'astro:content';
+
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.localeCompare(a.data.date) || a.data.title.localeCompare(b.data.title)).slice(0, 3);
+const popular = ['merge-pdf', 'sign-pdf', 'compress-pdf', 'pdf-to-image', 'image-compressor', 'image-resizer', 'image-converter', 'percentage-calculator'].map((s) => toolBySlug(s)!);
+const cats = Object.keys(CATEGORIES) as Category[];
 const faqs = [
   { q: 'Are my files uploaded to your servers?', a: 'No. The PDF and image tools run in your browser, so the files you select are read and processed on your own device. You can confirm this in your browser\'s network inspector.' },
   { q: 'Do I need an account?', a: 'No. There is no sign-up, and the tools are free to use.' },
   { q: 'Is there a file size limit?', a: 'Yes, to protect your browser\'s memory: up to 100 MB per PDF and 30 MB per image. Each tool page lists its limits.' },
   { q: 'Do the tools work on phones?', a: 'Yes. The layouts are responsive, and the tools work in current mobile browsers. Very large files may be slow on older phones.' },
 ];
+const why = [
+  { icon: 'lock', t: 'Private by design', d: 'PDF and image tools run entirely in your browser. There is no upload step, so your documents stay on your device.' },
+  { icon: 'zap', t: 'Fast, with no queue', d: 'Processing starts the moment you add a file. No waiting for an upload, a server, or an email with your result.' },
+  { icon: 'layers', t: 'Simple to use', d: 'One job per page, clear steps, drag-and-drop uploads and plain-language messages when something needs attention.' },
+  { icon: 'shield', t: 'Honest results', d: 'Every tool explains its limits, such as what PDF compression does to text, and shows real before and after sizes.' },
+];
 ---
-<Base rawTitle title={`${SITE.name}: Free Online PDF, Image & Calculator Tools`} description={SITE.description}>
-  <section class="hero">
-    <span class="eyebrow">Free · No sign-up · Private</span>
-    <h1>Everyday PDF, image and calculator tools that work in your browser</h1>
-    <p class="lead">Merge and compress PDFs, resize and convert images, or work out a loan payment. Your files are processed on your own device and are never uploaded.</p>
-    <ToolBrowser id="home" />
+<Base bleed rawTitle title={`${SITE.name}: Free Online PDF, Image & Calculator Tools`} description={SITE.description}>
+  <section class="home-hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Free PDF, image &amp; calculator tools</span>
+        <h1>Powerful online tools. <span class="grad-text">Simple solutions.</span></h1>
+        <p class="lead">Merge, sign and compress PDFs, resize and convert images, or run a quick calculation. Everything works right in your browser, and your files never leave your device.</p>
+        <HeroSearch />
+        <div class="cta-row">
+          <a class="btn btn-primary btn-large" href="/tools/">Explore all {TOOLS.length} tools <Icon name="arrow" size={18} /></a>
+          <a class="btn btn-secondary btn-large" href="/tools/merge-pdf/">Try PDF Merger</a>
+        </div>
+        <ul class="hero-points">
+          <li><Icon name="lock" size={18} /> Files stay on your device</li>
+          <li><Icon name="check" size={18} /> No sign-up</li>
+          <li><Icon name="tag" size={18} /> Free to use</li>
+        </ul>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hv-card hv-main">
+          <div class="hv-bar"><i></i><i></i><i></i></div>
+          <div class="hv-drop">
+            <span class="tool-icon cat-pdf"><Icon name="merge" /></span>
+            <b>Drop your PDFs here</b>
+            <span>Combine, reorder and download</span>
+          </div>
+          <div class="hv-files">
+            <div class="hv-file"><span class="mini-icon cat-pdf"><Icon name="pdf" /></span>Document 1.pdf<small>PDF</small></div>
+            <div class="hv-file"><span class="mini-icon cat-pdf"><Icon name="pdf" /></span>Document 2.pdf<small>PDF</small></div>
+          </div>
+        </div>
+        <div class="hv-card hv-chip a"><span class="mini-icon cat-pdf"><Icon name="sign" /></span>Sign PDF</div>
+        <div class="hv-card hv-chip b"><span class="mini-icon cat-image"><Icon name="resize" /></span>Resize image</div>
+        <div class="hv-card hv-chip c"><span class="mini-icon cat-calculator"><Icon name="percent" /></span>Percentages</div>
+        <div class="hv-card hv-chip d"><span class="mini-icon cat-image"><Icon name="convert" /></span>Convert format</div>
+      </div>
+    </div>
   </section>
 
-  <section class="trust-row" aria-label="Why use this site">
-    <div class="trust-item"><Icon name="lock" /><div><strong>Files stay on your device</strong><span>PDF and image tools run locally in your browser. No upload step exists.</span></div></div>
-    <div class="trust-item"><Icon name="zap" /><div><strong>Fast and simple</strong><span>No account, no watermarks, no queue. Open a tool and use it.</span></div></div>
-    <div class="trust-item"><Icon name="info" /><div><strong>Honest results</strong><span>Each tool explains its limits and trade-offs, such as what PDF compression costs in quality.</span></div></div>
-    <div class="trust-item"><Icon name="shield" /><div><strong>Transparent policies</strong><span>Plain-language <a href="/privacy/">privacy</a> and <a href="/cookies/">cookie</a> information that matches how the site works.</span></div></div>
-  </section>
-
-  <section class="section" aria-labelledby="how">
-    <h2 id="how">How it works</h2>
-    <ol class="steps content-block">
-      <li><strong>Pick a tool.</strong> Search above or browse by category.</li>
-      <li><strong>Add your file or numbers.</strong> Drag a file in, or type your values. Everything is checked before processing.</li>
-      <li><strong>Download or read the result.</strong> Files are created in your browser and saved to your device.</li>
-    </ol>
+  <section class="section" aria-labelledby="popular">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Popular tools</span>
+        <h2 id="popular">Start with the tools people reach for most</h2>
+        <p>Pick a tool, add your file, and download the result. No account needed.</p>
+      </div>
+      <ul class="grid">{popular.map((t) => <ToolCard tool={t} />)}</ul>
+      <p style="margin-top:22px"><a class="btn btn-secondary" href="/tools/">See all {TOOLS.length} tools <Icon name="arrow" size={16} /></a></p>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="cats">
-    <h2 id="cats">Browse by category</h2>
-    <ul class="grid">
-      {(Object.keys(CATEGORIES) as Category[]).map((c) => (
-        <li class="card"><a class="cat-card" href={CATEGORIES[c].path}>
-          <span class={`tool-icon cat-${c}`}><Icon name={c === 'calculator' ? 'calculator' : c} /></span>
-          <h3>{CATEGORIES[c].name}</h3>
-          <p>{TOOLS.filter((t) => t.category === c).map((t) => t.name).join(', ')}.</p>
-        </a></li>
-      ))}
-    </ul>
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Categories</span>
+        <h2 id="cats">Everything organised by what you need to do</h2>
+      </div>
+      <div class="cat-grid">
+        {cats.map((c) => {
+          const list = TOOLS.filter((t) => t.category === c);
+          return (
+            <a class={`cat-card ${c}`} href={CATEGORIES[c].path}>
+              <span class={`tool-icon cat-${c}`}><Icon name={c === 'calculator' ? 'calculator' : c} /></span>
+              <h3>{CATEGORIES[c].name}</h3>
+              <p>{c === 'pdf' ? 'Merge, split, sign, compress and convert PDF files.' : c === 'image' ? 'Compress, resize, crop and convert JPG, PNG and WebP images.' : 'Clear formulas and stated assumptions for everyday calculations.'}</p>
+              <ul>{list.map((t) => <li>{t.name}</li>)}</ul>
+              <span class="more">Explore {list.length} tools <Icon name="arrow" size={18} /></span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
   </section>
 
   <AdSlot placement="home-content" />
 
-  <section class="section" aria-labelledby="guides">
-    <h2 id="guides">Latest guides</h2>
-    <ul class="post-list">
-      {posts.map((p) => (
-        <li class="card"><a class="post-card" href={`/blog/${p.id}/`}>
-          <span class="tag">{p.data.topic}</span>
-          <h3 style="margin:6px 0">{p.data.title}</h3>
-          <p>{p.data.description}</p>
-        </a></li>
-      ))}
-    </ul>
-    <p><a href="/blog/">See all guides →</a></p>
+  <section class="band band-alt" style="margin-top:76px" aria-labelledby="why">
+    <div class="container">
+      <div class="section-head center">
+        <span class="kicker">Why {SITE.name}</span>
+        <h2 id="why">Built to be quick, clear and respectful of your files</h2>
+        <p>Only things that are true of how the site actually works.</p>
+      </div>
+      <div class="why-grid">
+        {why.map((w) => (
+          <div class="why"><span class="mini-icon"><Icon name={w.icon} /></span><h3>{w.t}</h3><p>{w.d}</p></div>
+        ))}
+      </div>
+    </div>
   </section>
 
-  <section class="section content-block" aria-labelledby="faq">
-    <h2 id="faq">Common questions</h2>
-    <FaqList faqs={faqs} />
-    <p><a href="/faq/">More questions and answers →</a></p>
+  <section class="section" aria-labelledby="how">
+    <div class="container">
+      <div class="section-head center">
+        <span class="kicker">How it works</span>
+        <h2 id="how">Three steps, no learning curve</h2>
+      </div>
+      <ol class="flow">
+        <li><strong>Pick a tool</strong><span>Search or browse by category. Each page explains what the tool does and what to expect.</span></li>
+        <li><strong>Add your file or numbers</strong><span>Drag a file in or type your values. Everything is checked before it is processed.</span></li>
+        <li><strong>Download or read the result</strong><span>Files are created in your browser and saved to your device. Calculators answer instantly.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="guides">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Guides</span>
+        <h2 id="guides">Practical how-tos from the editorial team</h2>
+      </div>
+      <ul class="post-list">
+        {posts.map((p) => (
+          <li class="card"><a class="post-card" href={`/blog/${p.id}/`}>
+            <span class="tag">{p.data.topic}</span>
+            <h3>{p.data.title}</h3>
+            <p>{p.data.description}</p>
+            <span class="read">{p.data.readingMinutes} min read</span>
+          </a></li>
+        ))}
+      </ul>
+      <p style="margin-top:22px"><a href="/blog/">See all guides →</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="faq">
+    <div class="container">
+      <div class="content-block">
+        <div class="section-head"><span class="kicker">FAQ</span><h2 id="faq">Common questions</h2></div>
+        <FaqList faqs={faqs} />
+        <p><a href="/faq/">More questions and answers →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="container">
+      <div class="cta-box">
+        <h2>Ready when you are</h2>
+        <p>Open a tool and get it done in a few clicks. It is free, and your files stay with you.</p>
+        <div class="cta-row">
+          <a class="btn btn-light btn-large" href="/tools/">Browse all tools <Icon name="arrow" size={18} /></a>
+          <a class="btn btn-outline-light btn-large" href="/blog/">Read the guides</a>
+        </div>
+      </div>
+    </div>
   </section>
 </Base>

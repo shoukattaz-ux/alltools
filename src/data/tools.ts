@@ -36,7 +36,7 @@ export const CATEGORIES: Record<Category, { name: string; path: string; title: s
   },
   calculator: {
     name: 'Calculators', path: '/calculators/', title: 'Free Online Calculators',
-    description: 'Free BMI, percentage, age, loan and discount calculators with clear formulas and stated assumptions. Instant results, nothing stored.',
+    description: 'Free BMI, percentage, age and discount calculators with clear formulas and stated assumptions. Instant results, nothing stored.',
     blurb: 'Quick, transparent calculators for everyday questions. Each page states its formula and assumptions, and your inputs never leave your device.',
   },
 };
@@ -333,7 +333,7 @@ export const TOOLS: Tool[] = [
       { q: 'Is BMI accurate for athletes?', a: 'Often not. Muscular people can have a high BMI without excess body fat. Other measures, such as waist circumference or body-fat percentage, give additional context.' },
       { q: 'Does this tool give medical advice?', a: 'No. It is an educational calculator. Speak to a doctor or qualified health professional about your weight and health.' },
     ],
-    related: ['percentage-calculator', 'age-calculator', 'loan-calculator'],
+    related: ['percentage-calculator', 'discount-calculator', 'age-calculator'],
     search: 'bmi calculator body mass index weight height healthy kg lb',
   },
   {
@@ -357,7 +357,7 @@ export const TOOLS: Tool[] = [
       { q: 'Why is a 50% decrease not undone by a 50% increase?', a: 'Because the second percentage applies to a smaller number. 100 reduced by 50% is 50; increasing 50 by 50% gives 75, not 100.' },
       { q: 'Are results rounded?', a: 'Results are displayed to at most four decimal places, so they can differ slightly from a calculation rounded earlier.' },
     ],
-    related: ['discount-calculator', 'loan-calculator', 'bmi-calculator'],
+    related: ['discount-calculator', 'bmi-calculator', 'age-calculator'],
     search: 'percentage calculator percent of increase decrease change difference',
   },
   {
@@ -381,32 +381,8 @@ export const TOOLS: Tool[] = [
       { q: 'What about leap-day birthdays?', a: 'Someone born on 29 February is shown as celebrating on 28 February in non-leap years. Some jurisdictions treat 1 March as the legal date instead.' },
       { q: 'Is my date of birth stored?', a: 'No. The calculation happens in your browser, and nothing is saved or sent.' },
     ],
-    related: ['bmi-calculator', 'percentage-calculator', 'loan-calculator'],
+    related: ['bmi-calculator', 'percentage-calculator', 'discount-calculator'],
     search: 'age calculator date of birth how old years months days birthday',
-  },
-  {
-    slug: 'loan-calculator', name: 'Loan Calculator', category: 'calculator', icon: 'bank',
-    short: 'Monthly payment, total interest and total repayment for a fixed-rate loan.',
-    seoTitle: 'Loan Calculator: Monthly Payment & Interest',
-    metaDescription: 'Calculate the monthly payment, total interest and total repayment of a fixed-rate loan, with a year-by-year breakdown and a clear statement of assumptions.',
-    h1: 'Loan Calculator',
-    intro: 'Estimate what a fixed-rate, fully amortising loan will cost. Enter the amount, annual interest rate and term to see the monthly payment, the total interest you would pay, the total amount repaid, and how the balance falls year by year.',
-    local: false,
-    steps: ['Enter the loan amount and choose a currency for display.', 'Enter the annual interest rate (APR as a percentage).', 'Enter the term in years, months, or both.', 'Select "Calculate" and review the summary and yearly breakdown.'],
-    features: ['Monthly payment, total interest and total repayment.', 'Year-by-year principal, interest and remaining balance.', 'Zero-interest loans handled correctly.', 'Display in 16 currencies (formatting only, with no exchange-rate conversion).', 'Assumptions stated on the page.'],
-    examples: [
-      { title: 'Car loan', body: '25,000 at 7% over 5 years gives a monthly payment of about 495.03 and about 4,702 in total interest.' },
-      { title: 'Compare terms', body: 'Run the same amount over 3 and 5 years. The longer loan has a lower payment but a higher total interest.' },
-    ],
-    limits: ['Assumes a fixed rate, equal monthly payments, interest compounded monthly at rate ÷ 12, and payments at the end of each month.', 'Does not include fees, insurance, taxes, balloon payments, extra repayments, variable rates or lender-specific rounding or day-count rules.', 'Results are estimates for planning only. Your lender\'s figures take precedence. This is not financial advice.'],
-    faqs: [
-      { q: 'What formula does the calculator use?', a: 'Monthly payment = P × r ÷ (1 − (1 + r)^−n), where P is the amount, r is the annual rate ÷ 12 as a decimal, and n is the number of monthly payments. At 0% interest, the payment is P ÷ n.' },
-      { q: 'Why does my lender show a different figure?', a: 'Lenders may add fees, calculate interest daily, use a different compounding method, or round differently. The calculator shows a standard estimate.' },
-      { q: 'Does the currency affect the result?', a: 'No. The currency only changes how numbers are formatted. There is no conversion.' },
-      { q: 'Can I include extra payments?', a: 'Not in this version. Extra payments would reduce interest and shorten the term.' },
-    ],
-    related: ['percentage-calculator', 'discount-calculator', 'age-calculator'],
-    search: 'loan calculator monthly payment interest mortgage car amortization repayment',
   },
   {
     slug: 'discount-calculator', name: 'Discount Calculator', category: 'calculator', icon: 'tag',
@@ -429,7 +405,7 @@ export const TOOLS: Tool[] = [
       { q: 'Is tax calculated before or after the discount?', a: 'In this calculator, after. Some retailers or regions treat coupons differently, so your receipt may vary.' },
       { q: 'Is my data stored?', a: 'No. Calculations run in your browser and nothing is saved or transmitted.' },
     ],
-    related: ['percentage-calculator', 'loan-calculator', 'bmi-calculator'],
+    related: ['percentage-calculator', 'bmi-calculator', 'age-calculator'],
     search: 'discount calculator sale price percent off savings coupon tax',
   },
 ];
@@ -444,7 +420,7 @@ export const toolsByCategory = (c: Category) => TOOLS.filter((t) => t.category =
  * Measured from the real interface; re-measure if you change a tool's initial layout.
  */
 export const TOOL_UI_HEIGHT: Record<string, number> = {
-  'merge-pdf': 193, 'sign-pdf': 161, 'split-pdf': 115, 'compress-pdf': 115, 'pdf-to-image': 131, 'image-to-pdf': 193,
-  'image-compressor': 193, 'image-resizer': 115, 'image-cropper': 115, 'image-converter': 193, 'image-to-base64': 115,
-  'bmi-calculator': 314, 'percentage-calculator': 1040, 'age-calculator': 141, 'loan-calculator': 884, 'discount-calculator': 542,
+  'merge-pdf': 361, 'sign-pdf': 325, 'split-pdf': 277, 'compress-pdf': 277, 'pdf-to-image': 295, 'image-to-pdf': 361,
+  'image-compressor': 361, 'image-resizer': 277, 'image-cropper': 277, 'image-converter': 361, 'image-to-base64': 277,
+  'bmi-calculator': 334, 'percentage-calculator': 1047, 'age-calculator': 150, 'discount-calculator': 585,
 };

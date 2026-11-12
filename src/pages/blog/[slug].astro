@@ -23,10 +23,12 @@ const ld = [{
 const prettyDate = new Date(d.date + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 <Base title={d.title} description={d.description} ogType="article" jsonLd={ld} breadcrumbs={[{ name: 'Guides', href: '/blog/' }, { name: d.title, href: `/blog/${post.id}/` }]}>
-  <article class="prose article">
+  <Fragment slot="hero">
     <span class="tag">{d.topic}</span>
-    <h1 style="margin-top:10px">{d.title}</h1>
-    <p class="post-meta">By the {SITE.name} editorial team · {prettyDate} · {d.readingMinutes} min read</p>
+    <h1 style="margin-top:12px;font-size:clamp(1.9rem,1.2rem + 2.6vw,2.9rem)">{d.title}</h1>
+    <p class="post-meta" style="margin:0">By the {SITE.name} editorial team · {prettyDate} · {d.readingMinutes} min read</p>
+  </Fragment>
+  <article class="prose article">
     <Content />
     <AdSlot placement="blog-in-article" />
     <div class="tool-cta">

@@ -25,7 +25,9 @@ const sections = [
 ];
 ---
 <Base title="Frequently Asked Questions" description={`Answers about ${SITE.name}: file privacy, supported formats and size limits, cookies, browser support, and how the free tools work.`} breadcrumbs={[{ name: 'FAQ', href: '/faq/' }]}>
-  <h1>Frequently asked questions</h1>
+  <Fragment slot="hero">
+    <h1>Frequently asked questions</h1>
+  </Fragment>
   <div class="content-block">
     {sections.map((s) => (<><h2>{s.title}</h2><FaqList faqs={s.faqs} /></>))}
     <p style="margin-top:28px">Still have a question? <a href="/contact/">Contact us</a>. For specifics on a tool, see its page, or browse <a href="/tools/">all tools</a>.</p>

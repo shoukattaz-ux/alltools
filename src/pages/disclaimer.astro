@@ -3,9 +3,11 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../data/site';
 ---
 <Base title="Disclaimer" description={`${SITE.name} tools and calculators provide general information only. Read about health, financial and file-processing limitations and our advertising and affiliate disclosure.`} breadcrumbs={[{ name: 'Disclaimer', href: '/disclaimer/' }]}>
-  <article class="prose legal">
+  <Fragment slot="hero">
     <h1>Disclaimer</h1>
     <p class="muted">Last updated: {SITE.lastUpdated}</p>
+  </Fragment>
+  <article class="prose legal">
 
     <h2>General information only</h2>
     <p>Everything on this Site, including tools, calculators and guides, is provided for general informational purposes. It is not professional advice, and you should not rely on it as a substitute for advice from a qualified professional.</p>
@@ -13,8 +15,8 @@ import { SITE } from '../data/site';
     <h2>Health information (BMI calculator and related guides)</h2>
     <p>The BMI calculator and the article about BMI are educational. BMI is a screening measure for adults and does not diagnose any condition. It does not account for muscle mass, body composition, age, ethnicity, pregnancy or medical conditions. Speak to a doctor or other qualified health professional about your health and weight. Never delay seeking medical advice because of a result from this Site.</p>
 
-    <h2>Financial information (loan, discount and percentage calculators)</h2>
-    <p>The loan calculator estimates fixed-rate, fully amortising payments under the assumptions stated on its page. It does not include fees, insurance, taxes, variable rates or lender-specific rules, and the results are not an offer, quote or financial advice. Your lender's figures are authoritative. Currency options affect display formatting only, and no exchange-rate conversion is performed. Discount and tax results may differ from a retailer's receipt.</p>
+    <h2>Financial information (discount and percentage calculators)</h2>
+    <p>The discount and percentage calculators show arithmetic results for the numbers you enter, under the assumptions stated on each page. Tax is added after discounts, which may differ from a retailer's receipt or your local rules. Currency options affect display formatting only, and no exchange-rate conversion is performed. The results are not an offer, quote or financial advice.</p>
 
     <h2>Date calculations</h2>
     <p>The age calculator uses calendar days and standard conventions for month lengths and leap-day birthdays. Legal definitions of age differ by jurisdiction.</p>

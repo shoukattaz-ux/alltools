@@ -5,9 +5,11 @@ const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
 const gaOn = !!SITE.analyticsId;
 ---
 <Base title="Privacy Policy" description={`How ${SITE.name} handles your information: files are processed in your browser, we do not require accounts, and optional analytics or advertising only load with your consent.`} breadcrumbs={[{ name: 'Privacy policy', href: '/privacy/' }]}>
-  <article class="prose legal">
+  <Fragment slot="hero">
     <h1>Privacy Policy</h1>
     <p class="muted">Last updated: {SITE.lastUpdated}</p>
+  </Fragment>
+  <article class="prose legal">
     <p>This policy explains what information {SITE.name} (“we”, “us”) handles when you use this website, and why. We have tried to keep it accurate and plain. If something here does not match what you observe, please <a href="/contact/">tell us</a>.</p>
 
     <h2>1. Who is responsible</h2>

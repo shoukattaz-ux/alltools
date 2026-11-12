@@ -46,9 +46,9 @@ Also edit `src/data/site.ts` (`operator.*`) and replace the `[OWNER TO COMPLETE�
 3. Pick **one** canonical host, set `SITE_URL` to it, and redirect the other to it (Rules → Redirect Rules / Bulk Redirects, 301). Rebuild after changing `SITE_URL`.
 4. SSL/TLS → set mode to **Full (strict)** and enable **Always Use HTTPS**. HSTS is sent by `public/_headers`.
 
-## 4. Headers, caching, 404
+## 4. Headers, redirects, caching, 404
 
-`public/_headers` is applied by Pages automatically: CSP, HSTS, `nosniff`, frame denial, referrer and permissions policies, and immutable caching for hashed assets (`/_astro/*`) and pdf.js data. HTML uses Cloudflare's default revalidation. `404.html` is served with a real 404 status. Note that Cloudflare **merges** matching `_headers` rules (it does not override), so don't repeat a header in two matching blocks.
+`public/_headers` is applied by Pages automatically: CSP, HSTS, `nosniff`, frame denial, referrer and permissions policies, and immutable caching for hashed assets (`/_astro/*`) and pdf.js data. HTML uses Cloudflare's default revalidation. `public/_redirects` sends links to removed pages (the old Loan Calculator) to the closest live page. `404.html` is served with a real 404 status. Note that Cloudflare **merges** matching `_headers` rules (it does not override), so don't repeat a header in two matching blocks.
 
 ## 5. After first deploy
 

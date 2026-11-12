@@ -3,7 +3,7 @@ title: "Percentage Increase and Decrease: Formulas and Examples"
 description: "Learn how to calculate percentage change, percentage difference and percentages of a number, with worked examples and the mistakes people often make."
 date: "2026-11-11"
 topic: "Calculators"
-tools: ["percentage-calculator", "discount-calculator", "loan-calculator"]
+tools: ["percentage-calculator", "discount-calculator"]
 readingMinutes: 6
 ---
 
@@ -58,10 +58,6 @@ If an interest rate goes from 4% to 5%, it rose by **one percentage point**, whi
 ### Using the wrong base
 
 "Our price is 20% lower than theirs" and "their price is 20% higher than ours" are not the same statement, as the base differs. Check which number you divide by.
-
-## Percentages and loans
-
-Interest rates are percentages applied repeatedly. To see how a rate turns into monthly payments, read [how loan payments are calculated](/blog/how-loan-payments-are-calculated/).
 
 ## FAQ
 

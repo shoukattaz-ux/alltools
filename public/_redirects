@@ -1,0 +1,5 @@
+# Removed pages: send any old links to the closest live page instead of a 404.
+/tools/loan-calculator/ /calculators/ 301
+/tools/loan-calculator /calculators/ 301
+/blog/how-loan-payments-are-calculated/ /blog/ 301
+/blog/how-loan-payments-are-calculated /blog/ 301

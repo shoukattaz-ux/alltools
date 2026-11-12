@@ -4,9 +4,11 @@ import Icon from '../components/Icon.astro';
 import { SITE } from '../data/site';
 ---
 <Base title="Contact Us" description={`Contact the ${SITE.name} team with feedback, bug reports, advertising or business enquiries.`} breadcrumbs={[{ name: 'Contact', href: '/contact/' }]}>
-  <article class="prose">
+  <Fragment slot="hero">
     <h1>Contact us</h1>
     <p class="lead">We read every message about bugs, feature ideas and partnership enquiries.</p>
+  </Fragment>
+  <article class="prose">
 
     {SITE.contactEmail ? (
       <p><Icon name="mail" size={18} /> Email: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a></p>

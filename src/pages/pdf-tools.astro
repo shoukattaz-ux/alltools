@@ -1,14 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
 import ToolBrowser from '../components/ToolBrowser.astro';
 import { CATEGORIES, toolsByCategory } from '../data/tools';
 const cat = CATEGORIES.pdf;
 const tools = toolsByCategory('pdf');
 ---
 <Base title={cat.title} description={cat.description} breadcrumbs={[{ name: cat.name, href: cat.path }]}>
-  <h1>{cat.title}</h1>
-  <p class="lead">{cat.blurb}</p>
-  <ToolBrowser id="pdf" category="pdf" showFilters={false} />
+  <Fragment slot="hero">
+    <span class="tool-icon cat-pdf" style="margin-bottom:14px"><Icon name="pdf" /></span>
+    <h1>{cat.title}</h1>
+    <p class="lead">{cat.blurb}</p>
+  </Fragment>
+  <ToolBrowser id="pdf" category="pdf" showFilters={false} showSearch={false} />
   <section class="section content-block">
     <h2>About these {cat.name.toLowerCase()}</h2>
     <ul class="ticks">

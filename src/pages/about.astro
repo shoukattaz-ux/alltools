@@ -4,9 +4,11 @@ import { SITE } from '../data/site';
 import { TOOLS } from '../data/tools';
 ---
 <Base title="About Us" description={`${SITE.name} offers free PDF, image and calculator tools that run in your browser, so your files stay on your device. Learn how and why the site works the way it does.`} breadcrumbs={[{ name: 'About us', href: '/about/' }]}>
-  <article class="prose">
+  <Fragment slot="hero">
     <h1>About {SITE.name}</h1>
     <p class="lead">{SITE.name} is a collection of {TOOLS.length} free online tools for everyday document, image and calculation tasks.</p>
+  </Fragment>
+  <article class="prose">
 
     <h2>What we do</h2>
     <p>People regularly need to merge a few PDFs, shrink a photo for a form, or work out a monthly payment. Many websites that offer these jobs ask you to upload your files to their servers, often with sign-ups, watermarks or limits. We built {SITE.name} to offer a simpler alternative.</p>

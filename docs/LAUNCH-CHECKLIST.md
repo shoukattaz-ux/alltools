@@ -34,13 +34,13 @@
 
 | Check | Result |
 | --- | --- |
-| Production build (42 pages) | passes |
+| Production build (40 pages) | passes |
 | Type check (`astro check`) | 0 errors, 0 warnings |
 | ESLint | clean |
-| Unit tests | 88 passing |
-| E2E (Chromium, real files, all 16 tools, CSP enforced) | 28 passing |
-| axe-core WCAG 2 A/AA + best-practice on 26 pages + the signer with every dialog open | 0 violations |
+| Unit tests | 83 passing |
+| E2E (Chromium, real files, all 15 tools, CSP enforced) | 28 passing |
+| axe-core WCAG 2 A/AA + best-practice on 25 pages + the signer with every dialog open | 0 violations |
 | Post-build verifier (titles, descriptions, canonicals, one H1, heading order, links, sitemap, no inline scripts) | passes |
-| Layout shift (16 tool pages × desktop & mobile 375 px) | worst CLS 0.0000 (measured) |
+| Layout shift (15 tool pages × desktop & mobile 375 px) | worst CLS 0.0019 (measured) |
 | `npm audit --omit=dev` | 0 vulnerabilities |
 | Not tested | Firefox, Safari/WebKit, real mobile devices, Lighthouse scores, very large (100 MB) files |

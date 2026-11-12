@@ -1,6 +1,6 @@
 /** Instant tool search and category filter. Progressive enhancement over the server-rendered grid. */
 function init(root: HTMLElement) {
-  const input = root.querySelector<HTMLInputElement>('[data-search-input]')!;
+  const input = root.querySelector<HTMLInputElement>('[data-search-input]');
   const cards = [...root.querySelectorAll<HTMLElement>('.tool-card')];
   const empty = root.querySelector<HTMLElement>('[data-empty]')!;
   const count = root.querySelector<HTMLElement>('[data-count]')!;
@@ -8,7 +8,7 @@ function init(root: HTMLElement) {
   let filter = 'all';
 
   const apply = () => {
-    const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = (input?.value ?? '').toLowerCase().split(/\s+/).filter(Boolean);
     let shown = 0;
     for (const card of cards) {
       const hay = card.dataset.search ?? '';
@@ -21,7 +21,7 @@ function init(root: HTMLElement) {
   };
 
   root.querySelector('form')?.addEventListener('submit', (e) => e.preventDefault());
-  input.addEventListener('input', apply);
+  input?.addEventListener('input', apply);
   for (const chip of chips) {
     chip.addEventListener('click', () => {
       filter = chip.dataset.filter ?? 'all';
@@ -30,7 +30,7 @@ function init(root: HTMLElement) {
     });
   }
   const q = new URLSearchParams(location.search).get('q');
-  if (q && root.hasAttribute('data-autoquery')) input.value = q.slice(0, 80);
+  if (q && input && root.hasAttribute('data-autoquery')) input.value = q.slice(0, 80);
   apply();
 }
 document.querySelectorAll<HTMLElement>('[data-browser]').forEach(init);

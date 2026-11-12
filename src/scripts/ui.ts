@@ -130,9 +130,12 @@ const ACCEPT: Record<FileKind, string> = { pdf: '.pdf,application/pdf', jpeg: '.
 export function dropzone(opts: DropzoneOptions) {
   const labels = opts.kinds.map((k) => KIND_LABEL[k]).join(', ');
   const input = h('input', { type: 'file', accept: opts.kinds.map((k) => ACCEPT[k]).join(','), multiple: opts.multiple });
-  const el = h('label', { class: 'dropzone' },
-    h('strong', { text: opts.title ?? (opts.multiple ? 'Drop files here or click to choose' : 'Drop a file here or click to choose') }),
-    h('span', { text: `${labels} · up to ${Math.round(opts.maxBytes / 1048576)} MB each${opts.multiple ? ` · up to ${opts.maxFiles ?? 30} files` : ''}` }),
+  const icon = h('span', { class: 'dz-icon', 'aria-hidden': 'true' });
+  icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>'; // static markup, no user data
+  const el = h('label', { class: 'dropzone' }, icon,
+    h('strong', { text: opts.title ?? (opts.multiple ? 'Drop files here' : 'Drop a file here') }),
+    h('span', { class: 'dz-btn', 'aria-hidden': 'true', text: opts.multiple ? 'Choose files' : 'Choose a file' }),
+    h('span', { class: 'dz-hint', text: `${labels} · up to ${Math.round(opts.maxBytes / 1048576)} MB each${opts.multiple ? ` · up to ${opts.maxFiles ?? 30} files` : ''} · stays on your device` }),
     input);
   const handle = async (list: FileList | File[]) => {
     const files = [...list];
