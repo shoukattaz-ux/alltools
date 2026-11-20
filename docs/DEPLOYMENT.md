@@ -31,8 +31,8 @@ Set under **Settings → Variables and Secrets** (Production, and Preview if wan
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `NODE_VERSION` | recommended | `22` (also set by `.node-version`) |
-| `SITE_URL` | **yes** | Canonical origin, e.g. `https://www.example.com` (no trailing slash). Drives canonical URLs, Open Graph URLs, sitemap and robots.txt. |
-| `PUBLIC_CONTACT_EMAIL` | **yes** | Shown on Contact/legal pages; enables the contact form. |
+| `SITE_URL` | optional (defaults to `https://getalltools.shop`) | Canonical origin, e.g. `https://www.example.com` (no trailing slash). Drives canonical URLs, Open Graph URLs, sitemap and robots.txt. |
+| `PUBLIC_CONTACT_EMAIL` | optional (defaults to the address in `src/data/site.ts`) | Shown on Contact/legal pages; enables the contact form. |
 | `PUBLIC_GA_ID` | optional | GA4 measurement ID (`G-XXXXXXXXXX`). Loaded only after consent. |
 | `PUBLIC_ADS_ENABLED` | optional | `true` to enable ad containers (keep `false` until approved). |
 | `PUBLIC_ADSENSE_CLIENT` | optional | `ca-pub-…` publisher ID. |

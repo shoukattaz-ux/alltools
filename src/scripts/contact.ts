@@ -1,6 +1,6 @@
 export {};
 const form = document.getElementById('contact-form') as HTMLFormElement | null;
-const statusEl = document.getElementById('contact-statusEl')!;
+const statusEl = document.getElementById('contact-status')!;
 function show(kind: 'error' | 'success', msg: string) {
   statusEl.innerHTML = '';
   const d = document.createElement('div');

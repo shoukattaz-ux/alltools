@@ -13,7 +13,7 @@ const gaOn = !!SITE.analyticsId;
     <p>This policy explains what information {SITE.name} (“we”, “us”) handles when you use this website, and why. We have tried to keep it accurate and plain. If something here does not match what you observe, please <a href="/contact/">tell us</a>.</p>
 
     <h2>1. Who is responsible</h2>
-    <p>The operator of this site is <span class="todo" data-owner-todo>{SITE.operator.legalName}</span>, <span class="todo" data-owner-todo>{SITE.operator.address}</span>. Contact: {SITE.contactEmail ? <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a> : <span class="todo" data-owner-todo>[OWNER TO COMPLETE: contact email]</span>}.</p>
+    <p>This site is operated by {SITE.operatorLabel}. Contact: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.</p>
 
     <h2>2. Your files and the tools</h2>
     <p>The PDF and image tools (merger, splitter, signer, compressor, converters, cropper, resizer, Base64 encoder) run <strong>entirely in your browser</strong>. The files you select are read into your browser's memory, the result is generated there, and it is saved to your device when you download it. <strong>The site has no feature for uploading files, and your files are not sent to our servers.</strong> The calculators compute results in your browser and do not transmit the numbers or dates you enter.</p>

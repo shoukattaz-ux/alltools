@@ -12,13 +12,9 @@ export const SITE = {
   url: ((env.SITE_URL as string | undefined) || 'https://getalltools.shop').replace(/\/+$/, ''),
   locale: 'en',
   /** Genuine owner-supplied value. Empty until PUBLIC_CONTACT_EMAIL is set; pages show a clear "owner must complete" notice. */
-  contactEmail: ((env.PUBLIC_CONTACT_EMAIL as string | undefined) || '').trim(),
-  /** Legal entity details. Intentionally blank: the owner must fill these in before launch (see docs/LAUNCH-CHECKLIST.md). */
-  operator: {
-    legalName: '[OWNER TO COMPLETE: legal name of the person or company operating this site]',
-    address: '[OWNER TO COMPLETE: postal address, if required in your jurisdiction]',
-    governingLaw: '[OWNER TO COMPLETE: governing law / jurisdiction]',
-  },
+  contactEmail: ((env.PUBLIC_CONTACT_EMAIL as string | undefined) || 'm24941776@gmail.com').trim(),
+  /** Who runs the site. The owner chose not to publish a personal name or postal address; the contact email is the point of contact. */
+  operatorLabel: 'the independent owner of ToolHaven (getalltools.shop)',
   lastUpdated: '11 November 2026',
   analyticsId: ((env.PUBLIC_GA_ID as string | undefined) || '').trim(),
   adsense: { client: ((env.PUBLIC_ADSENSE_CLIENT as string | undefined) || '').trim() },

@@ -2,9 +2,9 @@
 
 ## Must do before going public
 
-- [ ] Choose the final brand name and domain; set `SITE.name` (`src/data/site.ts`) and `SITE_URL`.
-- [ ] Set `PUBLIC_CONTACT_EMAIL` (a monitored inbox).
-- [ ] Complete every `[OWNER TO COMPLETE …]` item: operator legal name/address, governing law (`src/data/site.ts`), About page "who runs the site". Run `npm run verify` to see the count, which should reach **0**.
+- [x] Domain is `getalltools.shop` (default `SITE_URL`); brand name kept as ToolHaven (`SITE.name` in `src/data/site.ts`).
+- [x] Contact email is set in `src/data/site.ts` (override with `PUBLIC_CONTACT_EMAIL`). Keep the inbox monitored.
+- [x] No owner placeholders remain (the owner chose not to publish a personal name or postal address; the legal pages say so neutrally). Optional: add your real name or a governing country to `Privacy`, `About` and `Terms` if you want them stated.
 - [ ] Have a qualified professional review Privacy Policy, Terms, Disclaimer and Cookie Policy for your jurisdiction (they describe this implementation accurately but are not legal advice).
 - [ ] Confirm hosting really is Cloudflare (the Privacy Policy names it); edit if not.
 - [ ] Regenerate `public/og-image.png` for the final brand: `SITE_NAME="YourBrand" node scripts/make-og-image.mjs`; replace `public/favicon.svg` and the logo in `Header.astro` if desired.

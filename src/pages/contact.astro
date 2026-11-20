@@ -13,7 +13,7 @@ import { SITE } from '../data/site';
     {SITE.contactEmail ? (
       <p><Icon name="mail" size={18} /> Email: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a></p>
     ) : (
-      <div class="notice notice-warn" role="note"><Icon name="alert" size={18} /><span><span class="todo" data-owner-todo>[OWNER TO COMPLETE: set PUBLIC_CONTACT_EMAIL in the build environment]</span> A contact address has not been configured yet, so the form below is disabled.</span></div>
+      <div class="notice notice-warn" role="note"><Icon name="alert" size={18} /><span>A contact address has not been configured, so the form below is disabled.</span></div>
     )}
 
     <h2>Send a message</h2>

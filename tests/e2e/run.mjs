@@ -543,14 +543,36 @@ test('Discount calculator', async () => {
   await root(page).getByText(/between 0% and 100%/).waitFor();
 });
 
-test('Contact form is disabled until an email is configured; legal pages contain owner placeholders', async () => {
+test('Contact page is configured with a real address; no owner placeholders remain; no consent banner or ads while unconfigured', async () => {
   const page = await newPage();
   await page.goto(base + '/contact/');
-  assert.ok(await page.getByRole('button', { name: 'Open email draft' }).isDisabled());
+  assert.ok(await page.getByRole('button', { name: 'Open email draft' }).isEnabled());
+  assert.equal(await page.locator('main a[href^="mailto:"]').first().getAttribute('href'), 'mailto:m24941776@gmail.com');
+  for (const u of ['/', '/contact/', '/privacy/', '/about/', '/terms/', '/advertise/', '/cookies/', '/disclaimer/']) {
+    await page.goto(base + u);
+    assert.equal(await page.locator('[data-owner-todo]').count(), 0, `${u} still has an owner placeholder`);
+    assert.ok(!/OWNER TO COMPLETE/.test(await page.content()), `${u} still says OWNER TO COMPLETE`);
+  }
   await page.goto(base + '/privacy/');
-  assert.ok(await page.locator('[data-owner-todo]').count() > 0);
+  assert.match(await page.locator('main').innerText(), /operated by the independent owner of ToolHaven/);
   assert.equal(await page.locator('[data-consent-banner]').count(), 0, 'no consent banner when no optional tracking is configured');
   assert.equal(await page.locator('.ad').count(), 0, 'no ad containers while ads are disabled');
+  // the contact form builds a mailto draft addressed to the configured email
+  await page.goto(base + '/contact/');
+  await page.getByLabel('Your name').fill('Test User');
+  await page.getByLabel('Your email').fill('test@example.org');
+  await page.getByLabel('Message').fill('Hello, this is a test message for the form.');
+  const nav = page.waitForEvent('framenavigated').catch(() => null);
+  // validation messages appear for bad input
+  await page.getByLabel('Your email').fill('not-an-email');
+  await page.getByRole('button', { name: 'Open email draft' }).click();
+  await page.getByText('Please enter a valid email address.').waitFor();
+  await page.getByLabel('Your email').fill('test@example.org');
+  const mailtoRequest = page.waitForEvent('console', { predicate: (m) => /Launched external handler for 'mailto:m24941776@gmail\.com\?subject=/.test(m.text()), timeout: 10000 }).catch(() => null);
+  await page.getByRole('button', { name: 'Open email draft' }).click();
+  await page.getByText(/email app should open/).waitFor();
+  await mailtoRequest; await nav;
+  problems = problems.filter((p) => !/mailto/.test(p));
 });
 
 test('security headers are present', async () => {
