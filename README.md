@@ -12,7 +12,7 @@ A static, privacy-first tools website. **All 15 tools run in the visitor's brows
 | Image | Compress (`/tools/image-compressor/`), Resize (`/tools/image-resizer/`), Crop (`/tools/image-cropper/`), Convert format (`/tools/image-converter/`), Image to Base64 (`/tools/image-to-base64/`) |
 | Calculators | BMI (`/tools/bmi-calculator/`), Percentage (`/tools/percentage-calculator/`), Age (`/tools/age-calculator/`), Discount (`/tools/discount-calculator/`) |
 
-Plus: homepage with instant search and category filters, category pages, tools directory, blog with 10 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (40 HTML pages in total).
+Plus: homepage with instant search and category filters, category pages, tools directory, blog with 15 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (45 HTML pages in total).
 
 ## Commands
 
@@ -23,7 +23,7 @@ npm run build        # production build into dist/
 npm run preview      # serve dist/ locally
 npm run check        # TypeScript / Astro type check
 npm run lint         # ESLint
-npm test             # 83 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
+npm test             # 88 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
 npm run verify       # post-build checks: SEO tags, links, sitemap, headings, inline scripts
 npm run test:e2e     # 28 real-browser tests of every tool + a11y (axe-core); run after build
 npm run test:cls     # layout-shift measurement of all tool pages
@@ -39,7 +39,7 @@ src/
   data/site.ts        brand, URLs, contact, operator placeholders, analytics/ads flags
   data/tools.ts       all tool content (titles, steps, FAQs...) + categories
   data/ads.ts         ad placements (all empty = no ads)
-  content/blog/*.md   the 10 guides (schema in src/content.config.ts)
+  content/blog/*.md   the 15 guides (schema in src/content.config.ts)
   layouts/Base.astro  <head> SEO, JSON-LD, header/footer, consent
   components/         Header (mega-menu), Footer, Logo, HeroSearch (instant suggestions), ToolCard, ToolBrowser, AdSlot, AffiliateLink, ConsentBanner, FaqList, Breadcrumbs, Icon
   pages/              index, tools/[slug], blog/[slug], category pages, legal pages, 404, robots.txt
@@ -50,7 +50,7 @@ src/
 public/               _headers (CSP + security headers), favicon, og-image.png
 scripts/              copy-pdfjs-assets, verify-site, make-og-image
 tests/unit, tests/e2e Vitest + Playwright
-docs/                 DEPLOYMENT, ADVERTISING, LAUNCH-CHECKLIST
+docs/                 DEPLOYMENT, ADVERTISING, LAUNCH-CHECKLIST, SEO-GROWTH
 ```
 
 ## Technology

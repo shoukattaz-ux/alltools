@@ -10,7 +10,7 @@
 - [ ] Regenerate `public/og-image.png` for the final brand: `SITE_NAME="YourBrand" node scripts/make-og-image.mjs`; replace `public/favicon.svg` and the logo in `Header.astro` if desired.
 - [ ] Deploy to Cloudflare Pages (docs/DEPLOYMENT.md); custom domain, HTTPS, canonical host redirect.
 - [ ] Check `/robots.txt`, `/sitemap-index.xml` show your domain.
-- [ ] Verify the site in Google Search Console and Bing Webmaster Tools; submit the sitemap.
+- [ ] Verify the site in Google Search Console and Bing Webmaster Tools; submit the sitemap. Follow docs/SEO-GROWTH.md (including checking Cloudflare is not blocking search/AI crawlers).
 - [ ] Manually test **Safari (macOS + iOS), Firefox and Edge**, plus a real Android phone. Automated tests ran in Chromium only. Pay attention to WebP export on Safari, and large-file behaviour on phones.
 - [ ] Try your own real-world PDFs (scans, large, unusual fonts, encrypted) through all PDF tools.
 - [ ] Read all content once more: facts, tone, and that no claim is untrue for your deployment.
@@ -34,10 +34,10 @@
 
 | Check | Result |
 | --- | --- |
-| Production build (40 pages) | passes |
+| Production build (45 pages) | passes |
 | Type check (`astro check`) | 0 errors, 0 warnings |
 | ESLint | clean |
-| Unit tests | 83 passing |
+| Unit tests | 88 passing |
 | E2E (Chromium, real files, all 15 tools, CSP enforced) | 28 passing |
 | axe-core WCAG 2 A/AA + best-practice on 25 pages + the signer with every dialog open | 0 violations |
 | Post-build verifier (titles, descriptions, canonicals, one H1, heading order, links, sitemap, no inline scripts) | passes |

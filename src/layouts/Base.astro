@@ -31,9 +31,10 @@ const crumbLd = crumbs && {
   '@context': 'https://schema.org', '@type': 'BreadcrumbList',
   itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: new URL(c.href, SITE.url).href })),
 };
-const orgLd = Astro.url.pathname === '/' ? [{
-  '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.name, url: SITE.url, description: SITE.description, inLanguage: 'en',
-}] : [];
+const orgLd = Astro.url.pathname === '/' ? [
+  { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${SITE.url}/#website`, name: SITE.name, url: SITE.url, description: SITE.description, inLanguage: 'en', publisher: { '@id': `${SITE.url}/#org` } },
+  { '@context': 'https://schema.org', '@type': 'Organization', '@id': `${SITE.url}/#org`, name: SITE.name, url: SITE.url, logo: `${SITE.url}/favicon.svg`, ...(SITE.contactEmail ? { contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: SITE.contactEmail, availableLanguage: 'English' } } : {}) },
+] : [];
 const allLd = [...orgLd, ...(crumbLd ? [crumbLd] : []), ...jsonLd];
 ---
 <!doctype html>
@@ -46,6 +47,9 @@ const allLd = [...orgLd, ...(crumbLd ? [crumbLd] : []), ...jsonLd];
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content="#3b2fd0" />
+    {SITE.verification.google && <meta name="google-site-verification" content={SITE.verification.google} />}
+    {SITE.verification.bing && <meta name="msvalidate.01" content={SITE.verification.bing} />}
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} guides`} href="/rss.xml" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <meta property="og:site_name" content={SITE.name} />

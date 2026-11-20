@@ -16,6 +16,11 @@ export const SITE = {
   /** Who runs the site. The owner chose not to publish a personal name or postal address; the contact email is the point of contact. */
   operatorLabel: 'the independent owner of ToolHaven (getalltools.shop)',
   lastUpdated: '11 November 2026',
+  /** Optional site-verification tokens (or verify by DNS TXT record instead, which needs no code). */
+  verification: {
+    google: ((env.PUBLIC_GSC_VERIFICATION as string | undefined) || '').trim(),
+    bing: ((env.PUBLIC_BING_VERIFICATION as string | undefined) || '').trim(),
+  },
   analyticsId: ((env.PUBLIC_GA_ID as string | undefined) || '').trim(),
   adsense: { client: ((env.PUBLIC_ADSENSE_CLIENT as string | undefined) || '').trim() },
   adsEnabled: String(env.PUBLIC_ADS_ENABLED || '').toLowerCase() === 'true',

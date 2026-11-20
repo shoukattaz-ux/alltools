@@ -5,15 +5,22 @@ import AdSlot from '../../components/AdSlot.astro';
 import FaqList from '../../components/FaqList.astro';
 import { TOOLS, CATEGORIES, TOOL_UI_HEIGHT, toolBySlug, toolUrl } from '../../data/tools';
 import { getCollection } from 'astro:content';
+import { SITE } from '../../data/site';
 
 export function getStaticPaths() { return TOOLS.map((tool) => ({ params: { slug: tool.slug }, props: { tool } })); }
 const { tool } = Astro.props;
 const cat = CATEGORIES[tool.category];
 const related = tool.related.map((s) => toolBySlug(s)!).filter(Boolean);
 const guides = (await getCollection('blog')).filter((p) => p.data.tools.includes(tool.slug)).slice(0, 3);
+const appLd = [{
+  '@context': 'https://schema.org', '@type': 'WebApplication', name: tool.name, url: `${SITE.url}${toolUrl(tool)}`, description: tool.metaDescription,
+  applicationCategory: tool.category === 'calculator' ? 'UtilitiesApplication' : tool.category === 'image' ? 'MultimediaApplication' : 'BusinessApplication',
+  operatingSystem: 'Any (modern web browser)', browserRequirements: 'Requires JavaScript', isAccessibleForFree: true, inLanguage: 'en',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }, publisher: { '@id': `${SITE.url}/#org` },
+}];
 const catLabel = cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase());
 ---
-<Base bleed heroClass="tall" title={tool.seoTitle} description={tool.metaDescription} breadcrumbs={[{ name: cat.name, href: cat.path }, { name: tool.name, href: toolUrl(tool) }]}>
+<Base bleed heroClass="tall" jsonLd={appLd} title={tool.seoTitle} description={tool.metaDescription} breadcrumbs={[{ name: cat.name, href: cat.path }, { name: tool.name, href: toolUrl(tool) }]}>
   <Fragment slot="hero">
     <div class="hero-meta" style="margin:0 0 14px">
       <span class="privacy-pill" style="margin:0"><Icon name="shield" size={17} />{tool.local ? 'Processed in your browser. Your files are not uploaded.' : 'Calculated in your browser. Nothing you enter is stored or sent.'}</span>

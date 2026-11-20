@@ -66,8 +66,10 @@ const robots = existsSync(join(root, 'robots.txt')) ? readFileSync(join(root, 'r
 if (!/Sitemap: https?:\/\/\S+\/sitemap-index\.xml/.test(robots)) err('robots.txt', 'missing Sitemap line');
 if (!existsSync(join(root, '404.html'))) err('404', 'missing 404.html');
 if (!existsSync(join(root, '_headers'))) err('_headers', 'missing');
-for (const f of ['og-image.png', 'favicon.svg']) if (!existsSync(join(root, f))) err(f, 'missing');
+for (const f of ['og-image.png', 'favicon.svg', 'llms.txt', 'rss.xml']) if (!existsSync(join(root, f))) err(f, 'missing');
 
+if (existsSync(join(root, 'llms.txt'))) { const llms = readFileSync(join(root, 'llms.txt'), 'utf8'); for (const m of llms.matchAll(/\]\(https?:\/\/[^/]+(\/[^)]*)\)/g)) if (!urlExists(m[1])) err('llms.txt', `links to missing ${m[1]}`); }
+if (existsSync(join(root, 'rss.xml'))) { const rss = readFileSync(join(root, 'rss.xml'), 'utf8'); for (const m of rss.matchAll(/<link>https?:\/\/[^/]+(\/[^<]*)<\/link>/g)) if (!urlExists(m[1])) err('rss.xml', `links to missing ${m[1]}`); }
 console.log(`Checked ${pages.length} HTML pages, ${locs.length} sitemap URLs.`);
 console.log(`Owner placeholders remaining (must be completed before launch): ${ownerTodos}`);
 if (/\.example\//.test(robots)) console.log('NOTE: SITE_URL is still a placeholder domain. Set SITE_URL before the production build.');

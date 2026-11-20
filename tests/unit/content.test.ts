@@ -35,10 +35,10 @@ describe('tool definitions (SEO + completeness)', () => {
 
 describe('blog content', () => {
   const files = readdirSync('src/content/blog').filter((f) => f.endsWith('.md'));
-  it('has 10 articles with unique titles', () => {
-    expect(files).toHaveLength(10);
+  it('has 15 articles with unique titles', () => {
+    expect(files).toHaveLength(15);
     const titles = files.map((f) => /^title: "(.*)"$/m.exec(readFileSync(`src/content/blog/${f}`, 'utf8'))![1]);
-    expect(new Set(titles).size).toBe(10);
+    expect(new Set(titles).size).toBe(15);
   });
   it.each(files)('%s links to real tools and has a FAQ', (f) => {
     const text = readFileSync(`src/content/blog/${f}`, 'utf8');
