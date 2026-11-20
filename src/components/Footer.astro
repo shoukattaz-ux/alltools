@@ -3,7 +3,7 @@ import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 import { SITE, hasOptionalTracking } from '../data/site';
 import { TOOLS, toolUrl, CATEGORIES } from '../data/tools';
-const groups = (['pdf', 'image', 'calculator'] as const).map((c) => ({ title: CATEGORIES[c].name, href: CATEGORIES[c].path, items: TOOLS.filter((t) => t.category === c) }));
+const groups = (['pdf', 'image', 'video', 'calculator'] as const).map((c) => ({ title: CATEGORIES[c].name, href: CATEGORIES[c].path, items: TOOLS.filter((t) => t.category === c) }));
 const company = [['About us', '/about/'], ['Contact us', '/contact/'], ['FAQ', '/faq/'], ['Guides', '/blog/'], ['Advertise with us', '/advertise/']];
 const legal = [['Privacy policy', '/privacy/'], ['Terms and conditions', '/terms/'], ['Disclaimer', '/disclaimer/'], ['Cookie policy', '/cookies/']];
 ---

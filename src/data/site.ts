@@ -6,8 +6,8 @@ const env = import.meta.env;
 
 export const SITE = {
   name: 'ToolHaven',
-  tagline: 'Free online PDF, image and calculator tools',
-  description: 'Free online PDF, image and calculator tools that run in your browser. Merge, sign, compress and convert files. Your files never leave your device.',
+  tagline: 'Free online PDF, image, video and calculator tools',
+  description: 'Free online PDF, image, video and calculator tools that run in your browser. Merge, sign, compress and convert files. Your files never leave your device.',
   /** Canonical origin. Set SITE_URL at build time; the fallback is a non-resolving placeholder. */
   url: ((env.SITE_URL as string | undefined) || 'https://getalltools.shop').replace(/\/+$/, ''),
   locale: 'en',
@@ -32,6 +32,7 @@ export const NAV = [
   { href: '/tools/', label: 'All tools' },
   { href: '/pdf-tools/', label: 'PDF' },
   { href: '/image-tools/', label: 'Image' },
+  { href: '/video-tools/', label: 'Video' },
   { href: '/calculators/', label: 'Calculators' },
   { href: '/blog/', label: 'Guides' },
 ] as const;

@@ -8,7 +8,7 @@ const raw = document.getElementById('tool-index')?.textContent;
 
 if (root && input && box && count && raw) {
   const tools: Entry[] = JSON.parse(raw);
-  const CAT: Record<string, string> = { pdf: 'PDF', image: 'Image', calculator: 'Calculator' };
+  const CAT: Record<string, string> = { pdf: 'PDF', image: 'Image', video: 'Video', calculator: 'Calculator' };
   const render = () => {
     const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
     if (!terms.length) { box.hidden = true;  count.textContent = ''; return; }

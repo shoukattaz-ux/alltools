@@ -1,11 +1,13 @@
 /** Content-based file validation. Never trusts the extension or the browser-reported MIME type alone. */
-export type FileKind = 'pdf' | 'jpeg' | 'png' | 'webp';
+export type FileKind = 'pdf' | 'jpeg' | 'png' | 'webp' | 'mp4' | 'webm';
 
 export const MB = 1024 * 1024;
 export const LIMITS = {
   pdfBytes: 100 * MB,
   imageBytes: 30 * MB,
   base64Bytes: 10 * MB,
+  /** Video is processed in memory in the browser; larger files risk running out of memory. */
+  videoBytes: 500 * MB,
   maxFiles: 30,
   /** Largest image area (pixels) we will decode onto a canvas; guards against out-of-memory crashes. */
   maxPixels: 100_000_000,
@@ -18,12 +20,16 @@ export async function sniffKind(file: Blob): Promise<FileKind | null> {
   if (head.length >= 8 && head[0] === 0x89 && asc(1, 3) === 'PNG') return 'png';
   if (head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return 'jpeg';
   if (head.length >= 12 && asc(0, 4) === 'RIFF' && asc(8, 4) === 'WEBP') return 'webp';
+  // ISO base media (MP4, MOV, M4V, 3GP): the "ftyp" box follows a 4-byte size.
+  if (head.length >= 12 && asc(4, 4) === 'ftyp') return 'mp4';
+  // Matroska / WebM: EBML header.
+  if (head.length >= 4 && head[0] === 0x1a && head[1] === 0x45 && head[2] === 0xdf && head[3] === 0xa3) return 'webm';
   return null;
 }
 
-export const KIND_LABEL: Record<FileKind, string> = { pdf: 'PDF', jpeg: 'JPG', png: 'PNG', webp: 'WebP' };
-export const KIND_MIME: Record<Exclude<FileKind, 'pdf'>, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
-export const KIND_EXT: Record<FileKind, string> = { pdf: 'pdf', jpeg: 'jpg', png: 'png', webp: 'webp' };
+export const KIND_LABEL: Record<FileKind, string> = { pdf: 'PDF', jpeg: 'JPG', png: 'PNG', webp: 'WebP', mp4: 'MP4/MOV', webm: 'WebM/MKV' };
+export const KIND_MIME: Record<'jpeg' | 'png' | 'webp', string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+export const KIND_EXT: Record<FileKind, string> = { pdf: 'pdf', jpeg: 'jpg', png: 'png', webp: 'webp', mp4: 'mp4', webm: 'webm' };
 
 export interface ValidatedFile { file: File; kind: FileKind }
 export interface ValidationOptions { kinds: FileKind[]; maxBytes: number; maxFiles?: number; existing?: number }

@@ -24,6 +24,9 @@ describe('file validation', () => {
     expect(await sniffKind(mk([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe('png');
     expect(await sniffKind(mk([0xff, 0xd8, 0xff, 0xe0, 0, 0]))).toBe('jpeg');
     expect(await sniffKind(mk('RIFF\0\0\0\0WEBPVP8 '))).toBe('webp');
+    expect(await sniffKind(mk('\0\0\0\x20ftypisom\0\0\0\0'))).toBe('mp4');
+    expect(await sniffKind(mk('\0\0\0\x14ftypqt  \0\0\0\0'))).toBe('mp4');
+    expect(await sniffKind(mk([0x1a, 0x45, 0xdf, 0xa3, 0x01, 0, 0, 0]))).toBe('webm');
     expect(await sniffKind(mk('hello world, plain text'))).toBeNull();
   });
   it('ignores the extension', async () => {

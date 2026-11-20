@@ -10,12 +10,12 @@ import { CATEGORIES, TOOLS, toolBySlug, type Category } from '../data/tools';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date.localeCompare(a.data.date) || a.data.title.localeCompare(b.data.title)).slice(0, 3);
-const popular = ['merge-pdf', 'sign-pdf', 'compress-pdf', 'pdf-to-image', 'image-compressor', 'image-resizer', 'image-converter', 'percentage-calculator'].map((s) => toolBySlug(s)!);
+const popular = ['merge-pdf', 'sign-pdf', 'compress-pdf', 'compress-video', 'image-compressor', 'image-resizer', 'image-converter', 'percentage-calculator'].map((s) => toolBySlug(s)!);
 const cats = Object.keys(CATEGORIES) as Category[];
 const faqs = [
-  { q: 'Are my files uploaded to your servers?', a: 'No. The PDF and image tools run in your browser, so the files you select are read and processed on your own device. You can confirm this in your browser\'s network inspector.' },
+  { q: 'Are my files uploaded to your servers?', a: 'No. The PDF, image and video tools run in your browser, so the files you select are read and processed on your own device. You can confirm this in your browser\'s network inspector.' },
   { q: 'Do I need an account?', a: 'No. There is no sign-up, and the tools are free to use.' },
-  { q: 'Is there a file size limit?', a: 'Yes, to protect your browser\'s memory: up to 100 MB per PDF and 30 MB per image. Each tool page lists its limits.' },
+  { q: 'Is there a file size limit?', a: 'Yes, to protect your browser\'s memory: up to 100 MB per PDF, 30 MB per image and 500 MB per video. Each tool page lists its limits.' },
   { q: 'Do the tools work on phones?', a: 'Yes. The layouts are responsive, and the tools work in current mobile browsers. Very large files may be slow on older phones.' },
 ];
 const why = [
@@ -29,9 +29,9 @@ const why = [
   <section class="home-hero">
     <div class="container hero-grid">
       <div>
-        <span class="eyebrow"><span class="dot"></span> Free PDF, image &amp; calculator tools</span>
+        <span class="eyebrow"><span class="dot"></span> Free PDF, image, video &amp; calculator tools</span>
         <h1>Powerful online tools. <span class="grad-text">Simple solutions.</span></h1>
-        <p class="lead">Merge, sign and compress PDFs, resize and convert images, or run a quick calculation. Everything works right in your browser, and your files never leave your device.</p>
+        <p class="lead">Merge, sign and compress PDFs, shrink videos, resize and convert images, or run a quick calculation. Everything works right in your browser, and your files never leave your device.</p>
         <HeroSearch />
         <div class="cta-row">
           <a class="btn btn-primary btn-large" href="/tools/">Explore all {TOOLS.length} tools <Icon name="arrow" size={18} /></a>
@@ -89,7 +89,7 @@ const why = [
             <a class={`cat-card ${c}`} href={CATEGORIES[c].path}>
               <span class={`tool-icon cat-${c}`}><Icon name={c === 'calculator' ? 'calculator' : c} /></span>
               <h3>{CATEGORIES[c].name}</h3>
-              <p>{c === 'pdf' ? 'Merge, split, sign, compress and convert PDF files.' : c === 'image' ? 'Compress, resize, crop and convert JPG, PNG and WebP images.' : 'Clear formulas and stated assumptions for everyday calculations.'}</p>
+              <p>{c === 'pdf' ? 'Merge, split, sign, compress and convert PDF files.' : c === 'video' ? 'Compress and trim videos with quality presets and a target file size.' : c === 'image' ? 'Compress, resize, crop and convert JPG, PNG and WebP images.' : 'Clear formulas and stated assumptions for everyday calculations.'}</p>
               <ul>{list.map((t) => <li>{t.name}</li>)}</ul>
               <span class="more">Explore {list.length} tools <Icon name="arrow" size={18} /></span>
             </a>

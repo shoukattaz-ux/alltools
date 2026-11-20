@@ -125,7 +125,7 @@ export interface DropzoneOptions {
   onErrors: (errors: string[]) => void;
 }
 
-const ACCEPT: Record<FileKind, string> = { pdf: '.pdf,application/pdf', jpeg: '.jpg,.jpeg,image/jpeg', png: '.png,image/png', webp: '.webp,image/webp' };
+const ACCEPT: Record<FileKind, string> = { pdf: '.pdf,application/pdf', jpeg: '.jpg,.jpeg,image/jpeg', png: '.png,image/png', webp: '.webp,image/webp', mp4: '.mp4,.m4v,.mov,video/mp4,video/quicktime', webm: '.webm,.mkv,video/webm,video/x-matroska' };
 
 export function dropzone(opts: DropzoneOptions) {
   const labels = opts.kinds.map((k) => KIND_LABEL[k]).join(', ');

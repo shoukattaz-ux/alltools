@@ -1,18 +1,19 @@
 # ToolHaven: free PDF, image & calculator tools
 
-A static, privacy-first tools website. **All 15 tools run in the visitor's browser**: files are never uploaded, and there is no backend to run, secure or pay for. Built with [Astro](https://astro.build) and TypeScript, designed for Cloudflare Pages.
+A static, privacy-first tools website. **All 16 tools run in the visitor's browser**: files are never uploaded, and there is no backend to run, secure or pay for. Built with [Astro](https://astro.build) and TypeScript, designed for Cloudflare Pages.
 
 "ToolHaven" is a placeholder brand: change `SITE.name` in `src/data/site.ts` and every page follows.
 
-## The 15 tools
+## The 16 tools
 
 | Category | Tools (URL) |
 | --- | --- |
 | PDF | Merge (`/tools/merge-pdf/`), Sign (`/tools/sign-pdf/`), Split (`/tools/split-pdf/`), Compress (`/tools/compress-pdf/`), PDF to image (`/tools/pdf-to-image/`), Image to PDF (`/tools/image-to-pdf/`) |
 | Image | Compress (`/tools/image-compressor/`), Resize (`/tools/image-resizer/`), Crop (`/tools/image-cropper/`), Convert format (`/tools/image-converter/`), Image to Base64 (`/tools/image-to-base64/`) |
+| Video | Compress (`/tools/compress-video/`): quality presets, target size, lossless trim, resolution/frame-rate/format/audio options |
 | Calculators | BMI (`/tools/bmi-calculator/`), Percentage (`/tools/percentage-calculator/`), Age (`/tools/age-calculator/`), Discount (`/tools/discount-calculator/`) |
 
-Plus: homepage with instant search and category filters, category pages, tools directory, blog with 15 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (45 HTML pages in total).
+Plus: homepage with instant search and category filters, category pages, tools directory, blog with 16 guides, About, Contact, Privacy, Terms, Disclaimer, Cookie Policy, FAQ, Advertise With Us and a 404 page (48 HTML pages in total).
 
 ## Commands
 
@@ -23,9 +24,9 @@ npm run build        # production build into dist/
 npm run preview      # serve dist/ locally
 npm run check        # TypeScript / Astro type check
 npm run lint         # ESLint
-npm test             # 88 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
+npm test             # 107 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
 npm run verify       # post-build checks: SEO tags, links, sitemap, headings, inline scripts
-npm run test:e2e     # 28 real-browser tests of every tool + a11y (axe-core); run after build
+npm run test:e2e     # 34 real-browser tests of every tool + a11y (axe-core); run after build
 npm run test:cls     # layout-shift measurement of all tool pages
 npm run ci           # everything above in order
 ```
@@ -39,7 +40,7 @@ src/
   data/site.ts        brand, URLs, contact, operator placeholders, analytics/ads flags
   data/tools.ts       all tool content (titles, steps, FAQs...) + categories
   data/ads.ts         ad placements (all empty = no ads)
-  content/blog/*.md   the 15 guides (schema in src/content.config.ts)
+  content/blog/*.md   the 16 guides (schema in src/content.config.ts)
   layouts/Base.astro  <head> SEO, JSON-LD, header/footer, consent
   components/         Header (mega-menu), Footer, Logo, HeroSearch (instant suggestions), ToolCard, ToolBrowser, AdSlot, AffiliateLink, ConsentBanner, FaqList, Breadcrumbs, Icon
   pages/              index, tools/[slug], blog/[slug], category pages, legal pages, 404, robots.txt
@@ -73,6 +74,7 @@ Premium-SaaS look: indigo brand with teal accent, Inter typography, layered shad
 ## Known limitations
 
 - The PDF Signer does not fill form fields or create certificate-based signatures. Saved signatures live in the visitor's own browser storage (disclosed in the Privacy and Cookie policies).
+- Video compression needs a browser with WebCodecs (current Chrome, Edge, Safari). Available output formats depend on the device's encoders; the 500 MB limit exists because the result is built in memory. "Highest quality" is near-lossless, not mathematically lossless; only Lossless mode (no re-encode) is exact.
 - Processing happens in the browser, so very large files are bounded by device memory.
 - PDF compression cannot recompress embedded images in place; the stronger modes rasterise pages (text stops being selectable). Encrypted PDFs are not supported.
 - Image-to-PDF re-encodes JPEGs at 92% quality; metadata (EXIF) is dropped by every image tool.

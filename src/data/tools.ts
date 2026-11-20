@@ -1,4 +1,4 @@
-export type Category = 'pdf' | 'image' | 'calculator';
+export type Category = 'pdf' | 'image' | 'video' | 'calculator';
 export interface Faq { q: string; a: string }
 export interface Tool {
   slug: string;
@@ -33,6 +33,11 @@ export const CATEGORIES: Record<Category, { name: string; path: string; title: s
     name: 'Image tools', path: '/image-tools/', title: 'Free Online Image Tools',
     description: 'Compress, resize, crop and convert JPG, PNG and WebP images in your browser. Private, fast and free, with no uploads.',
     blurb: 'Prepare photos and graphics for websites, email and social media. Resize to exact dimensions, crop to a ratio, change formats and cut file size, all locally in your browser.',
+  },
+  video: {
+    name: 'Video tools', path: '/video-tools/', title: 'Free Online Video Tools',
+    description: 'Compress and trim MP4, MOV and WebM videos in your browser with quality presets and target file size. Private: videos are not uploaded.',
+    blurb: 'Make videos small enough to email or share without sending them to a server. Compression runs in your browser using your device\'s own video encoder.',
   },
   calculator: {
     name: 'Calculators', path: '/calculators/', title: 'Free Online Calculators',
@@ -311,6 +316,34 @@ export const TOOLS: Tool[] = [
     related: ['image-converter', 'image-compressor', 'image-resizer'],
     search: 'image to base64 encode data uri string html css embed',
   },
+  /* ------------------------------ Video ------------------------------ */
+  {
+    slug: 'compress-video', name: 'Video Compressor', category: 'video', icon: 'video',
+    short: 'Shrink MP4, MOV and WebM videos with quality presets, a target file size, trimming and lossless options.',
+    seoTitle: 'Video Compressor: Reduce MP4, MOV & WebM Size',
+    metaDescription: 'Compress video in your browser with quality presets or a target size (for email, WhatsApp, Discord). Choose resolution, codec, audio and trim. Not uploaded.',
+    h1: 'Compress a Video Online',
+    intro: 'Make a video small enough to send or upload while keeping it looking as good as possible. Pick a quality level or type the file size you need, and the tool calculates the settings. It runs in your browser, using your device\'s own video encoder, so the video is never uploaded.',
+    local: true,
+    steps: ['Select a video (MP4, MOV, M4V, WebM or MKV). Its resolution, length, frame rate and bitrate are shown, with a preview player.', 'Choose how to compress: a quality preset, a target file size, or "Lossless" to trim or change the container without re-encoding.', 'Optionally lower the resolution or frame rate, change the output format, adjust or remove the audio, and set start and end times to trim.', 'Check the estimated size, then select "Compress video". Watch the progress bar, compare the result with the original, and download.'],
+    features: ['Four quality presets, from "Highest quality (near-lossless)" to "Smallest file", tuned for the codec you pick.', 'Target file size mode: type 25 MB (or any size) and the bitrate is calculated for you, with a warning if the quality would suffer.', 'Lossless mode: trim or remove audio without re-encoding, so the picture is untouched.', 'Resolution, frame rate, output format (H.264 MP4, VP9 or AV1 WebM) and audio options, with a live estimate of the output size.', 'Trim to a start and end time to cut size before compressing.', 'Real progress with a Cancel button, and a before-and-after comparison of size, bitrate and settings.', 'Runs in your browser. Nothing is uploaded.'],
+    examples: [
+      { title: 'Fit under an email or chat limit', body: 'A 180 MB phone clip must be under 25 MB. Choose "Target size", type 25, and the tool picks the bitrate. If that would look poor, it tells you, and you can trim the clip or lower the resolution to 720p.' },
+      { title: 'Archive a screen recording', body: 'Use "Highest quality (near-lossless)" at the original resolution. Screen recordings often compress to a fraction of their size with no visible change.' },
+      { title: 'Cut the start and end off a clip losslessly', body: 'Choose "Lossless", set the start and end times, and download. The video and audio are copied, not re-encoded, so quality is identical. Cuts snap to the nearest keyframes.' },
+    ],
+    limits: ['Truly lossless compression does not exist for video: shrinking a video means discarding some detail. "Highest quality (near-lossless)" uses a very high bitrate so differences are very hard to see at normal viewing, but a frame-by-frame comparison would find small ones. Only the Lossless mode keeps the picture bit-for-bit, and it saves little or no space.', 'Your browser does the work. It needs a current Chrome, Edge or Safari (WebCodecs support). Which formats are offered depends on what your device can encode, and phones may show fewer options.', 'Some videos cannot be opened, for example when your browser cannot decode the codec (some HEVC/H.265 files in some browsers) or the file is damaged. The tool tells you.', 'Large or high-resolution videos take time, use battery, and need free memory. The file limit is 500 MB; the result is built in memory. Keep the tab open and visible while it runs.', 'Subtitles, chapters and multiple audio tracks are not guaranteed to be kept. Only the main video and audio are processed.', 'Metadata such as location and camera model may not be copied to the output.'],
+    faqs: [
+      { q: 'Is my video uploaded?', a: 'No. The video is read, decoded and re-encoded inside your browser using your device\'s video encoder. Nothing is sent to a server.' },
+      { q: 'Can I compress a video without losing quality?', a: 'Not in the strict sense, because compression removes information. "Highest quality (near-lossless)" keeps the bitrate high enough that most people will not notice a difference, and "Lossless" mode avoids re-encoding altogether (but changes the size very little). The tool shows the real bitrate before and after so you can judge.' },
+      { q: 'Which format should I choose?', a: 'MP4 with H.264 plays almost everywhere. WebM with VP9 usually gives smaller files for the same quality but plays on fewer devices. AV1 is smallest but slow to encode and the least compatible.' },
+      { q: 'How do I get under a size limit?', a: 'Use "Target size". If the quality warning appears, lower the resolution (720p or 480p), trim unneeded parts, or remove the audio, then try again.' },
+      { q: 'Why is my video taking a long time?', a: 'Encoding is demanding. Hardware encoders are fast; software encoders (especially AV1) are slow. Shorter clips and lower resolutions finish sooner.' },
+      { q: 'Why is the result not smaller?', a: 'If the original was already efficiently compressed (for example a video downloaded from a streaming site), there may be little to save. The tool caps the bitrate just below the original and warns you when savings are small.' },
+    ],
+    related: ['image-compressor', 'compress-pdf', 'image-converter'],
+    search: 'video compressor compress video mp4 mov webm reduce size shrink resize trim cut target file size whatsapp email discord',
+  },
   /* ---------------------------- Calculators --------------------------- */
   {
     slug: 'bmi-calculator', name: 'BMI Calculator', category: 'calculator', icon: 'heart',
@@ -420,7 +453,7 @@ export const toolsByCategory = (c: Category) => TOOLS.filter((t) => t.category =
  * Measured from the real interface; re-measure if you change a tool's initial layout.
  */
 export const TOOL_UI_HEIGHT: Record<string, number> = {
-  'merge-pdf': 361, 'sign-pdf': 325, 'split-pdf': 277, 'compress-pdf': 277, 'pdf-to-image': 295, 'image-to-pdf': 361,
+  'merge-pdf': 361, 'compress-video': 277, 'sign-pdf': 325, 'split-pdf': 277, 'compress-pdf': 277, 'pdf-to-image': 295, 'image-to-pdf': 361,
   'image-compressor': 361, 'image-resizer': 277, 'image-cropper': 277, 'image-converter': 361, 'image-to-base64': 277,
   'bmi-calculator': 334, 'percentage-calculator': 1047, 'age-calculator': 150, 'discount-calculator': 585,
 };

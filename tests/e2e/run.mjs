@@ -4,7 +4,8 @@ import { chromium } from 'playwright-core';
 import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import JSZip from 'jszip';
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, existsSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startServer } from './server.mjs';
@@ -78,7 +79,7 @@ const test = (name, fn) => tests.push({ name, fn });
 
 test('all pages load with 200, no console errors, CSP respected', async () => {
   const urls = ['/', '/tools/', '/pdf-tools/', '/image-tools/', '/calculators/', '/blog/', '/about/', '/contact/', '/privacy/', '/terms/', '/disclaimer/', '/cookies/', '/faq/', '/advertise/'];
-  const tools = ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator'];
+  const tools = ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'compress-video', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator'];
   for (const t of tools) urls.push(`/tools/${t}/`);
   const html = readFileSync(resolve(here, '../../dist/sitemap-0.xml'), 'utf8');
   for (const m of html.matchAll(/\/blog\/([a-z0-9-]+)\//g)) urls.push(`/blog/${m[1]}/`);
@@ -129,15 +130,17 @@ test('homepage hero search shows instant suggestions; directory search and categ
   // popular tools and categories on the homepage
   await page.goto(base + '/');
   assert.equal(await page.locator('#popular ~ .grid .tool-card, .section .grid .tool-card').count(), 8);
-  assert.equal(await page.locator('.cat-card').count(), 3);
+  assert.equal(await page.locator('.cat-card').count(), 4);
   // directory page: search + chips
   await page.goto(base + '/tools/');
   const visible = () => page.locator('.tool-card:visible').count();
-  assert.equal(await visible(), 15);
+  assert.equal(await visible(), 16);
   await page.fill('[data-search-input]', 'loan');
   assert.equal(await visible(), 0);
-  await page.fill('[data-search-input]', 'resize');
+  await page.fill('[data-search-input]', 'resizer');
   assert.equal(await visible(), 1);
+  await page.fill('[data-search-input]', 'resize');
+  assert.equal(await visible(), 2); // Image Resizer and the Video Compressor (which can lower resolution)
   await page.fill('[data-search-input]', '');
   await page.getByRole('button', { name: 'Calculators' }).click();
   assert.equal(await visible(), 4);
@@ -145,7 +148,9 @@ test('homepage hero search shows instant suggestions; directory search and categ
   assert.equal(await visible(), 6);
   await page.getByRole('button', { name: 'Image tools' }).click();
   assert.equal(await visible(), 5);
-  await page.goto(base + '/tools/?q=resize');
+  await page.getByRole('button', { name: 'Video tools' }).click();
+  assert.equal(await visible(), 1);
+  await page.goto(base + '/tools/?q=resizer');
   assert.equal(await page.locator('.tool-card:visible').count(), 1);
 });
 
@@ -588,7 +593,7 @@ test('accessibility: axe-core finds no violations on key pages and every tool', 
   const axeSrc = readFileSync(resolve(here, '../../node_modules/axe-core/axe.min.js'), 'utf8');
   const page = await newPage();
   const urls = ['/', '/tools/', '/pdf-tools/', '/blog/', '/blog/jpg-vs-png-vs-webp/', '/about/', '/contact/', '/privacy/', '/faq/', '/advertise/'];
-  for (const t of ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
+  for (const t of ['merge-pdf', 'sign-pdf', 'split-pdf', 'compress-pdf', 'compress-video', 'pdf-to-image', 'image-to-pdf', 'image-compressor', 'image-resizer', 'image-cropper', 'image-converter', 'image-to-base64', 'bmi-calculator', 'percentage-calculator', 'age-calculator', 'discount-calculator']) urls.push(`/tools/${t}/`);
   const bad = [];
   for (const u of urls) {
     await page.goto(base + u, { waitUntil: 'networkidle' });
@@ -857,6 +862,177 @@ test('accessibility: PDF Signer with a document loaded and each dialog open', as
   await drawSignature(page, 'Navy');
   await scan('with item selected');
   assert.deepEqual(bad, []);
+});
+
+/* ---- Video Compressor: real encodes, verified with ffprobe ---- */
+const ffOk = spawnSync('ffprobe', ['-version']).status === 0 && spawnSync('ffmpeg', ['-version']).status === 0;
+const probe = (f) => JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-print_format', 'json', '-show_streams', '-show_format', f]).toString());
+const vstream = (p) => p.streams.find((x) => x.codec_type === 'video');
+const astream = (p) => p.streams.find((x) => x.codec_type === 'audio');
+let vids = null;
+function makeVideos() {
+  if (vids) return vids;
+  const d = join(tmp, 'vid'); mkdirSync(d, { recursive: true });
+  const ff = (...a) => execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...a]);
+  ff('-f', 'lavfi', '-i', 'testsrc2=duration=6:size=1280x720:rate=30', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=6', '-c:v', 'libx264', '-b:v', '6M', '-pix_fmt', 'yuv420p', '-g', '30', '-c:a', 'aac', '-b:a', '192k', '-shortest', join(d, 'sample.mp4'));
+  ff('-f', 'lavfi', '-i', 'testsrc2=duration=4:size=640x360:rate=25', '-f', 'lavfi', '-i', 'sine=frequency=330:duration=4', '-c:v', 'libvpx-vp9', '-b:v', '1M', '-c:a', 'libopus', '-shortest', join(d, 'sample.webm'));
+  ff('-f', 'lavfi', '-i', 'testsrc2=duration=3:size=640x360:rate=30', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-b:v', '3M', join(d, 'noaudio.mp4'));
+  ff('-i', join(d, 'sample.mp4'), '-c', 'copy', '-f', 'mov', join(d, 'sample.mov'));
+  writeFileSync(join(d, 'truncated.mp4'), readFileSync(join(d, 'sample.mp4')).subarray(0, 20000));
+  return (vids = { dir: d, mp4: join(d, 'sample.mp4'), webm: join(d, 'sample.webm'), noaudio: join(d, 'noaudio.mp4'), mov: join(d, 'sample.mov'), truncated: join(d, 'truncated.mp4') });
+}
+async function loadVideo(page, path) {
+  await fileInput(page).setInputFiles(path);
+  await root(page).locator('.stat', { hasText: 'Resolution' }).waitFor({ timeout: 30000 });
+}
+async function runVideo(page) {
+  await btn(page, 'Compress video').click();
+  await root(page).getByRole('button', { name: /^Download/ }).waitFor({ timeout: 120000 });
+}
+async function saveVideo(page, name) {
+  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), root(page).getByRole('button', { name: /^Download/ }).click()]);
+  const path = join(tmp, name); await dl.saveAs(path); return path;
+}
+
+test('Video Compressor: reads the video, offers real options, compresses with a preset and the output is correct (ffprobe)', async () => {
+  if (!ffOk) { console.log('        (skipped: ffmpeg/ffprobe not installed)'); return; }
+  const v = makeVideos();
+  const page = await openTool('compress-video');
+  await loadVideo(page, v.mp4);
+  const info = await root(page).locator('.result-grid').first().innerText();
+  assert.match(info, /1280×720/); assert.match(info, /30 fps/); assert.match(info, /0:06/); assert.match(info, /AVC/);
+  assert.deepEqual((await page.getByLabel('Resolution').locator('option').allInnerTexts()).slice(1), ['480p', '360p', '240p']); // never upscales
+  assert.ok((await page.getByLabel('Output format').locator('option').count()) >= 1);
+  assert.match(await root(page).locator('.notice-info').first().innerText(), /Estimated result: about/);
+  assert.ok(await root(page).locator('video').first().isVisible(), 'preview player');
+  await page.getByLabel('Resolution').selectOption('480');
+  await runVideo(page);
+  assert.match(await root(page).locator('.notice-success').innerText(), /smaller/);
+  const out = await saveVideo(page, 'out-preset.mp4');
+  const p = probe(out), vs = vstream(p), as = astream(p);
+  assert.equal(vs.codec_name, 'h264'); assert.equal(vs.width, 854); assert.equal(vs.height, 480);
+  assert.ok(Math.abs(Number(p.format.duration) - 6) < 0.3, `duration ${p.format.duration}`);
+  assert.ok(Number(p.format.size) < 4575199 * 0.4, `output ${p.format.size} should be much smaller than the 4.4 MB original`);
+  assert.ok(as, 'audio kept'); assert.equal(as.codec_name, 'aac'); // original AAC copied, not re-encoded
+  assert.equal(Number(as.bit_rate), 129537, 'audio bitrate identical to the source = stream copy');
+  // the result plays in the browser
+  const dims = await root(page).locator('.video-box video').last().evaluate((el) => new Promise((res) => { if (el.readyState >= 1) res([el.videoWidth, el.videoHeight]); else el.addEventListener('loadedmetadata', () => res([el.videoWidth, el.videoHeight])); }));
+  assert.deepEqual(dims, [854, 480]);
+});
+
+test('Video Compressor: presets are ordered by size; target size lands near the target; stays below the original', async () => {
+  if (!ffOk) return;
+  const v = makeVideos();
+  const page = await openTool('compress-video');
+  await loadVideo(page, v.mp4);
+  const sizes = {};
+  for (const preset of ['visually-lossless', 'small']) {
+    await page.getByLabel('Quality', { exact: true }).selectOption(preset);
+    await runVideo(page);
+    sizes[preset] = Number(probe(await saveVideo(page, `out-${preset}.mp4`)).format.size);
+  }
+  assert.ok(sizes['visually-lossless'] > sizes.small, JSON.stringify(sizes));
+  assert.ok(sizes['visually-lossless'] < 4575199, 'even the best preset must be smaller than the source');
+  // target size mode
+  await page.getByRole('button', { name: 'Target file size' }).click();
+  await page.getByLabel('Maximum file size (MB)').fill('0.8');
+  await runVideo(page);
+  const tsize = Number(probe(await saveVideo(page, 'out-target.mp4')).format.size);
+  assert.ok(tsize <= 0.8 * 1024 * 1024 * 1.25 && tsize > 0.8 * 1024 * 1024 * 0.4, `target 0.8 MB, got ${(tsize / 1048576).toFixed(2)} MB`);
+  // impossible target is explained, button disabled
+  await page.getByLabel('Maximum file size (MB)').fill('0.01');
+  await root(page).getByText(/too small for this video length/).waitFor();
+  assert.ok(await btn(page, 'Compress video').isDisabled());
+  await page.getByLabel('Maximum file size (MB)').fill('');
+  await root(page).getByText(/Enter the maximum file size/).waitFor();
+});
+
+test('Video Compressor: lossless mode copies the streams (same codec and bitrate) and trims; audio can be removed', async () => {
+  if (!ffOk) return;
+  const v = makeVideos();
+  const page = await openTool('compress-video');
+  await loadVideo(page, v.mp4);
+  await page.getByRole('button', { name: 'Lossless (no re-encode)' }).click();
+  assert.ok(await page.getByLabel('Output format').isHidden(), 'encoder options are hidden in lossless mode');
+  await page.getByLabel('Trim: start').fill('1'); await page.getByLabel('Trim: end').fill('4');
+  assert.match(await root(page).locator('.notice-info').first().innerText(), /keyframes/);
+  await runVideo(page);
+  const out = await saveVideo(page, 'out-lossless.mp4');
+  const p = probe(out), vs = vstream(p), src = vstream(probe(v.mp4));
+  assert.equal(vs.codec_name, 'h264'); assert.equal(vs.profile, src.profile); assert.equal(vs.pix_fmt, src.pix_fmt);
+  assert.equal(vs.width, 1280); assert.equal(vs.height, 720);
+  assert.ok(Math.abs(Number(vs.bit_rate) - Number(src.bit_rate)) / Number(src.bit_rate) < 0.1, `video bitrate ${vs.bit_rate} vs source ${src.bit_rate}: not re-encoded`);
+  assert.ok(Number(p.format.duration) >= 2.9 && Number(p.format.duration) <= 4.6, `trimmed duration ${p.format.duration}`);
+  assert.ok(Number(p.format.size) < 4575199 * 0.75);
+  // remove audio
+  await page.getByLabel('Audio').selectOption('remove');
+  await runVideo(page);
+  const noA = probe(await saveVideo(page, 'out-noaudio.mp4'));
+  assert.equal(astream(noA), undefined, 'audio removed'); assert.ok(vstream(noA));
+  // the lossless audio options exclude re-encoding choices
+  const opts = await page.getByLabel('Audio').locator('option:not([hidden])').allInnerTexts();
+  assert.ok(!opts.some((o) => /Compress audio|Small audio/.test(o)), JSON.stringify(opts));
+});
+
+test('Video Compressor: WebM (VP9) in and out, MOV input, no-audio video hides the audio option, frame-rate option', async () => {
+  if (!ffOk) return;
+  const v = makeVideos();
+  const page = await openTool('compress-video');
+  await loadVideo(page, v.webm);
+  assert.match(await root(page).locator('.result-grid').first().innerText(), /VP9/);
+  await page.getByLabel('Output format').selectOption('vp9');
+  await page.getByLabel('Frame rate').selectOption('15');
+  await runVideo(page);
+  const w = probe(await saveVideo(page, 'out-vp9.webm'));
+  assert.equal(vstream(w).codec_name, 'vp9'); assert.equal(vstream(w).width, 640);
+  assert.ok(Math.abs(Number(vstream(w).r_frame_rate.split('/')[0]) / Number(vstream(w).r_frame_rate.split('/')[1] || 1) - 15) < 1.5, `fps ${vstream(w).r_frame_rate}`);
+  assert.ok(astream(w), 'audio kept'); assert.equal(astream(w).codec_name, 'opus');
+  // MOV container input
+  await loadVideo(page, v.mov);
+  assert.match(await root(page).locator('.result-grid').first().innerText(), /1280×720/);
+  // video without audio
+  await loadVideo(page, v.noaudio);
+  assert.ok(await page.getByLabel('Audio').isHidden(), 'no audio track: option hidden');
+  assert.match(await root(page).locator('.result-grid').first().innerText(), /no audio/);
+});
+
+test('Video Compressor: invalid input, bad trim times, cancel, and the check that fake or damaged files are rejected', async () => {
+  if (!ffOk) return;
+  const v = makeVideos();
+  const page = await openTool('compress-video');
+  await fileInput(page).setInputFiles([{ name: 'fake.mp4', mimeType: 'video/mp4', buffer: Buffer.from('this is not a video file at all') }]);
+  await root(page).getByText(/not a supported file/).waitFor();
+  await fileInput(page).setInputFiles(v.truncated);
+  await root(page).locator('.notice-error').last().waitFor({ timeout: 20000 });
+  assert.ok(await root(page).getByLabel('Resolution').isHidden(), 'no options for a video that could not be read');
+  await loadVideo(page, v.mp4);
+  await page.getByLabel('Trim: start').fill('4'); await page.getByLabel('Trim: end').fill('2');
+  await root(page).getByText(/end time must be after the start time/).waitFor();
+  assert.ok(await btn(page, 'Compress video').isDisabled());
+  await page.getByLabel('Trim: start').fill('abc');
+  await root(page).getByText(/minutes:seconds/).waitFor();
+  await page.getByLabel('Trim: start').fill('99');
+  await root(page).getByText(/must be before the end of the video/).waitFor();
+  await page.getByLabel('Trim: start').fill(''); await page.getByLabel('Trim: end').fill('');
+  // cancel: click Compress and Cancel in the same tick
+  await page.evaluate(() => {
+    const find = (t) => [...document.querySelectorAll('#tool-root button')].find((b) => b.textContent.trim() === t || b.textContent.includes(t));
+    find('Compress video').click();
+    setTimeout(() => find('Cancel').click(), 0);
+  });
+  await root(page).getByText(/Cancelled\. Nothing was saved\./).waitFor({ timeout: 30000 });
+  assert.equal(await root(page).getByRole('button', { name: /^Download/ }).count(), 0, 'nothing to download after cancelling');
+  assert.ok(await btn(page, 'Compress video').isEnabled(), 'can start again after cancelling');
+});
+
+test('accessibility: Video Compressor with a video loaded', async () => {
+  if (!ffOk) return;
+  const axeSrc = readFileSync(resolve(here, '../../node_modules/axe-core/axe.min.js'), 'utf8');
+  const page = await openTool('compress-video');
+  await loadVideo(page, makeVideos().mp4);
+  await page.evaluate(axeSrc);
+  const res = await page.evaluate(() => axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'] } }));
+  assert.deepEqual(res.violations.map((x) => `${x.id}: ${x.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`), []);
 });
 
 /* ---------- runner ---------- */
