@@ -70,7 +70,7 @@ for (const f of ['og-image.png', 'favicon.svg']) if (!existsSync(join(root, f)))
 
 console.log(`Checked ${pages.length} HTML pages, ${locs.length} sitemap URLs.`);
 console.log(`Owner placeholders remaining (must be completed before launch): ${ownerTodos}`);
-if (/example/.test(robots)) console.log('NOTE: SITE_URL is still the placeholder domain. Set SITE_URL before the production build.');
+if (/\.example\//.test(robots)) console.log('NOTE: SITE_URL is still a placeholder domain. Set SITE_URL before the production build.');
 for (const w of warnings) console.warn('warning:', w);
 if (errors.length) { console.error(`\n${errors.length} problem(s):`); errors.forEach((e) => console.error(' -', e)); process.exit(1); }
 console.log('Site verification passed.');

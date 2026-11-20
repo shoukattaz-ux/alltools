@@ -9,7 +9,7 @@ export const SITE = {
   tagline: 'Free online PDF, image and calculator tools',
   description: 'Free online PDF, image and calculator tools that run in your browser. Merge, sign, compress and convert files. Your files never leave your device.',
   /** Canonical origin. Set SITE_URL at build time; the fallback is a non-resolving placeholder. */
-  url: ((env.SITE_URL as string | undefined) || 'https://toolhaven.example').replace(/\/+$/, ''),
+  url: ((env.SITE_URL as string | undefined) || 'https://getalltools.shop').replace(/\/+$/, ''),
   locale: 'en',
   /** Genuine owner-supplied value. Empty until PUBLIC_CONTACT_EMAIL is set; pages show a clear "owner must complete" notice. */
   contactEmail: ((env.PUBLIC_CONTACT_EMAIL as string | undefined) || '').trim(),
