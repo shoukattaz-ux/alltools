@@ -36,7 +36,7 @@
         hosts.forEach(function (h) {
           var done = false;
           var t = setTimeout(function () { if (!done) { done = true; send('info', h + ': no answer within 4 s'); } }, 4000);
-          fetch('https://' + h + '/', { mode: 'no-cors', cache: 'no-store' }).then(function () { if (!done) { done = true; clearTimeout(t); send('info', h + ': reachable from this browser'); } }, function () { if (!done) { done = true; clearTimeout(t); send('error', h + ': BLOCKED or unreachable from this browser (ad blocker, DNS filter, firewall or network block)'); } });
+          fetch('https://' + h + '/', { mode: 'no-cors', cache: 'no-store' }).then(function () { if (!done) { done = true; clearTimeout(t); send('info', h + ': reachable from this browser'); } }, function () { if (!done) { done = true; clearTimeout(t); send('info', h + ': did not answer a plain request (inconclusive: many ad servers only serve ad files, so this alone does not mean it is blocked)'); } });
         });
         send(inner ? 'ok' : 'empty', 'elements created by the ad script: ' + inner + ' (external scripts on page: ' + hosts.length + ' hosts)');
       }, 4000);

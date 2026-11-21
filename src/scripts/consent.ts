@@ -52,9 +52,9 @@ let panel: HTMLElement | null = null;
 function hints(): string[] {
   const all = adLog.join('\n');
   const out: string[] = [];
-  const loadFailed = /failed to load from|BLOCKED or unreachable/.test(all);
+  const loadFailed = /failed to load from/.test(all);
   // A runtime error from the ad script itself (not just a failed download)
-  const runtimeError = adLog.some((l) => /error:/.test(l) && !/failed to load from|BLOCKED or unreachable/.test(l));
+  const runtimeError = adLog.some((l) => /error:/.test(l) && !/failed to load from/.test(l));
   if (loadFailed) out.push('HINT: this browser could not download the ad network script. Something between you and the ad server is blocking or timing out: an ad blocker, privacy browser, DNS filter, VPN/firewall, internet provider, or the ad server itself. This is not caused by the site. Try mobile data, another browser or turning blockers off.');
   if (runtimeError && /storage is blocked|cookies are blocked/.test(all)) out.push('HINT: the ad script crashed and this isolated frame blocks storage/cookies. The network script probably needs them.');
   else if (runtimeError) out.push('HINT: the ad script reported an error (browsers hide the details of third-party script errors).');
