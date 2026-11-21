@@ -5,7 +5,7 @@
 ## Built-in rules (do not undo them)
 
 - Ads only appear in `AdSlot` containers, clearly labelled "Advertisement", with reserved height (no layout shift).
-- Placements: homepage content, below tool instructions, between tool-page sections, inside blog articles, sidebar. **Never** inside the tool panel, over buttons/inputs, or near download buttons.
+- Placements: homepage (two: after the categories and after "How it works"), below tool instructions, between tool-page sections, inside blog articles, sidebar. **Never** inside the tool panel, over buttons/inputs, or near download buttons.
 - No auto-refresh, no pop-ups/interstitials, no redirects, no fake alerts, no deceptive download buttons.
 - Third-party scripts load only **after consent** (`src/scripts/consent.ts`), and a "Cookie settings" link in the footer lets visitors change their mind.
 

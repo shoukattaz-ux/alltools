@@ -10,10 +10,11 @@
  * Rules built in: ads never render inside the tool interface, never auto-refresh, never overlay content, and
  * always sit in a clearly labelled box with reserved height (no layout shift).
  */
-export type AdPlacement = 'home-content' | 'tool-below-instructions' | 'tool-between-sections' | 'blog-in-article' | 'sidebar';
+export type AdPlacement = 'home-content' | 'home-lower' | 'tool-below-instructions' | 'tool-between-sections' | 'blog-in-article' | 'sidebar';
 
 export const AD_SLOTS: Record<AdPlacement, { slot: string; minHeight: number }> = {
   'home-content': { slot: '', minHeight: 250 },
+  'home-lower': { slot: '', minHeight: 250 },
   'tool-below-instructions': { slot: '', minHeight: 250 },
   'tool-between-sections': { slot: '', minHeight: 250 },
   'blog-in-article': { slot: '', minHeight: 250 },
