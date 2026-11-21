@@ -40,3 +40,7 @@
   Content-Security-Policy: default-src https: data: blob:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'; img-src https: data: blob:; media-src https: blob:; frame-src https:; connect-src https:; base-uri 'none'; form-action https:; frame-ancestors 'self'
   X-Robots-Tag: noindex, nofollow
   Cache-Control: public, max-age=3600
+
+/ads-status.txt
+  X-Robots-Tag: noindex
+  Cache-Control: no-store

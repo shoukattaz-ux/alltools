@@ -19,12 +19,14 @@ How it works:
 - Placement: tool pages (under the instructions, between sections on wide screens, sidebar), guides (inside the article), homepage (two spots). Never inside the tool, never near Download buttons.
 - Banner choice: the 728x90 leaderboard is used only on screens 800 px wide or more; phones get the 300x250. The 728 banner is never loaded on a phone.
 - Consent: nothing from the ad network loads until the visitor presses Accept. Rejecting keeps ads off.
-- Isolation: each banner runs in a **sandboxed iframe without `allow-same-origin`** that loads `/ads/300x250.html` or `/ads/728x90.html`. The ad network's code cannot read this site's pages, cookies or storage, and can only navigate the page after a real click.
+- Isolation: each banner runs in a **sandboxed iframe without `allow-same-origin`** that loads `/ads/300x250/` or `/ads/728x90/`. The ad network's code cannot read this site's pages, cookies or storage, and can only navigate the page after a real click.
 - Headers: `public/_headers` gives `/ads/*` its own policy (detaching the strict site policy for those two files only). The rest of the site keeps `script-src 'self'`.
 - `/ads/` is `noindex`, disallowed in robots.txt and not in the sitemap.
 - Reserved height on every slot, so ads cause no layout shift.
 
 **To switch ads on:** in Cloudflare open the Worker, **Settings → Builds → Build variables and secrets**, add `PUBLIC_ADS_ENABLED` = `true`, then redeploy. To switch them off, set it to `false` (or delete it). A consent banner appears automatically when ads are on.
+
+**Quick check without developer tools:** open `https://getalltools.shop/ads-status.txt`. It says whether ads were enabled when this version was built, which network and placements are active, and when it was built. If it says `Ads enabled in this build: NO`, the build variable was not applied.
 
 Check after enabling (private window): the banner appears; nothing from `bauval.org` loads until Accept (DevTools → Network); after Accept, boxes labelled "Advertisement" show the ads. If a box stays empty, the network may have no ad to serve (no fill) or the site may not be approved yet in the Adsterra dashboard.
 

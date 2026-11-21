@@ -580,6 +580,14 @@ test('Contact page is configured with a real address; no owner placeholders rema
   problems = problems.filter((p) => !/mailto/.test(p));
 });
 
+test('ads are OFF by default and the status page says so', async () => {
+  const t = await (await fetch(base + '/ads-status.txt')).text();
+  assert.match(t, /Ads enabled in this build: NO/); assert.match(t, /PUBLIC_ADS_ENABLED = true/);
+  const page = await newPage();
+  await page.goto(base + '/tools/merge-pdf/', { waitUntil: 'networkidle' });
+  assert.equal(await page.locator('.ad, .ad-net, iframe').count(), 0);
+});
+
 test('security headers are present', async () => {
   const res = await fetch(base + '/');
   const h = res.headers;

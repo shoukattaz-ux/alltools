@@ -57,7 +57,7 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   assert.equal(frames.length, 3);
   assert.deepEqual(frames.map((f) => `${f.w}x${f.h}`).sort(), ['300x250', '300x250', '728x90']);
   for (const f of frames) {
-    assert.match(f.src, /^\/ads\/(300x250|728x90)\.html$/);
+    assert.match(f.src, /^\/ads\/(300x250|728x90)\/$/);
     assert.ok(!/allow-same-origin/.test(f.sandbox), 'ad frames must not be same-origin');
     assert.ok(/allow-scripts/.test(f.sandbox) && /allow-popups/.test(f.sandbox) && /allow-top-navigation-by-user-activation/.test(f.sandbox));
     assert.ok(!/allow-top-navigation(?!-by)/.test(f.sandbox), 'no forced top navigation');
@@ -69,7 +69,7 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   await page.waitForTimeout(1500);
   assert.ok(adRequests.length >= 2, `ad script requested after consent (${adRequests.length})`);
   assert.ok(adRequests.every((u) => /bauval\.org\/22\/(e7f4f2349f0b5f09bce2bc02ff2e0975|bff97ad5f8f26196cb49bfa41adfea78)$/.test(u)), adRequests.join(', '));
-  const first = page.frames().find((f) => f.url().endsWith('/ads/300x250.html'));
+  const first = page.frames().find((f) => f.url().endsWith('/ads/300x250/'));
   assert.ok(first, 'ad frame document loaded');
   assert.equal(await first.locator('#fake-ad').count(), 1, 'the ad script executed inside the frame (inline atOptions + external script allowed there)');
   const isolation = await first.evaluate(() => { try { return String(window.parent.document.title); } catch (e) { return 'blocked:' + e.name; } });
@@ -85,8 +85,15 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   await ctx.close();
 });
 
+test('status page reports that ads are enabled and which network and slots are active', async () => {
+  const t = await (await fetch(`${base}/ads-status.txt`)).text();
+  assert.match(t, /Ads enabled in this build: YES/); assert.match(t, /Adsterra banners: configured/); assert.match(t, /Consent banner: shown/);
+  assert.match(t, /tool-below-instructions/); assert.match(t, /Built: \d{4}-\d{2}-\d{2}T/);
+  assert.match((await fetch(`${base}/ads-status.txt`)).headers.get('x-robots-tag') ?? '', /noindex/);
+});
+
 test('ad frame pages have their own headers: framable by this site only, noindex, looser script policy', async () => {
-  const res = await fetch(`${base}/ads/300x250.html`);
+  const res = await fetch(`${base}/ads/300x250/`);
   const csp = res.headers.get('content-security-policy');
   assert.match(csp, /frame-ancestors 'self'/); assert.match(csp, /script-src https:/);
   assert.ok(!/default-src 'self'; script-src 'self'/.test(csp), 'the strict site policy was detached, not merged');

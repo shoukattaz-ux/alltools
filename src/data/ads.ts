@@ -2,7 +2,7 @@
  * Advertising placements. ALL ADS ARE OFF by default: nothing renders until PUBLIC_ADS_ENABLED=true is set at build time.
  *
  * Networks supported:
- *  - Adsterra banners (ADSTERRA_UNITS below). Each banner runs inside a sandboxed iframe that loads /ads/<size>.html, so the
+ *  - Adsterra banners (ADSTERRA_UNITS below). Each banner runs inside a sandboxed iframe that loads /ads/<size>/, so the
  *    network's code cannot access this site's page, cookies or storage. Frames are created only AFTER the visitor accepts cookies.
  *    Only banner formats are used. Pop-unders, smartlinks and social bars are deliberately NOT supported (they break our
  *    "no pop-ups, no forced redirects" promise).
@@ -15,8 +15,8 @@ export type AdPlacement = 'home-content' | 'home-lower' | 'tool-below-instructio
 
 /** The ad keys are public by design (they appear in the page source of any site that shows the ad). */
 export const ADSTERRA_UNITS = {
-  '300x250': { key: 'e7f4f2349f0b5f09bce2bc02ff2e0975', width: 300, height: 250, frame: '/ads/300x250.html' },
-  '728x90': { key: 'bff97ad5f8f26196cb49bfa41adfea78', width: 728, height: 90, frame: '/ads/728x90.html' },
+  '300x250': { key: 'e7f4f2349f0b5f09bce2bc02ff2e0975', width: 300, height: 250, frame: '/ads/300x250/' },
+  '728x90': { key: 'bff97ad5f8f26196cb49bfa41adfea78', width: 728, height: 90, frame: '/ads/728x90/' },
 } as const;
 export type AdsterraUnit = keyof typeof ADSTERRA_UNITS;
 

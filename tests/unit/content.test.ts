@@ -67,7 +67,7 @@ describe('advertising config', () => {
     for (const [size, u] of Object.entries(ADSTERRA_UNITS)) {
       expect(`${u.width}x${u.height}`).toBe(size);
       expect(u.key).toMatch(/^[0-9a-f]{32}$/);
-      const page = readFileSync(`public${u.frame}`, 'utf8');
+      const page = readFileSync(`public${u.frame}index.html`, 'utf8');
       expect(page).toContain(`'key' : '${u.key}'`);
       expect(page).toContain(`'height' : ${u.height}`); expect(page).toContain(`'width' : ${u.width}`);
       expect(page).toContain(`/22/${u.key}"`);

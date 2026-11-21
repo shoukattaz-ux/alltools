@@ -19,10 +19,10 @@ function loadScript(src: string, attrs: Record<string, string> = {}) {
   return s;
 }
 
-/** Adsterra banners run in a sandboxed iframe that loads our own /ads/<size>.html page. Created only after consent. */
+/** Adsterra banners run in a sandboxed iframe that loads our own /ads/<size>/ page. Created only after consent. */
 const FRAMES: Record<string, { w: number; h: number; src: string }> = {
-  '300x250': { w: 300, h: 250, src: '/ads/300x250.html' },
-  '728x90': { w: 728, h: 90, src: '/ads/728x90.html' },
+  '300x250': { w: 300, h: 250, src: '/ads/300x250/' },
+  '728x90': { w: 728, h: 90, src: '/ads/728x90/' },
 };
 function mountBannerAds() {
   const wide = window.matchMedia('(min-width: 800px)').matches;
