@@ -28,6 +28,8 @@ How it works:
 
 **Quick check without developer tools:** open `https://getalltools.shop/ads-status.txt`. It says whether ads were enabled when this version was built, which network and placements are active, and when it was built. If it says `Ads enabled in this build: NO`, the build variable was not applied.
 
+**Debug mode:** add `?adsdebug=1` to any page address, for example `https://getalltools.shop/tools/merge-pdf/?adsdebug=1`, press Accept, and scroll to the ad boxes. A small black panel at the top of the screen reports, in text: whether consent is saved, how many ad boxes the page has, whether each frame was created, what each ad frame reported (page loaded, storage blocked, errors, elements created) and a plain-language hint. Screenshot it. It changes nothing for normal visitors.
+
 Check after enabling (private window): the banner appears; nothing from `bauval.org` loads until Accept (DevTools → Network); after Accept, boxes labelled "Advertisement" show the ads. If a box stays empty, the network may have no ad to serve (no fill) or the site may not be approved yet in the Adsterra dashboard.
 
 `npm run test:ads` builds the site with ads enabled and verifies all of this in a real browser (with a stand-in for the network's script, since the real one is not reachable from the test environment). It cannot prove that real ads render: only a live check can.

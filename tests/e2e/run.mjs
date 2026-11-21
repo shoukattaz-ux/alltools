@@ -995,13 +995,14 @@ test('Video Compressor: WebM (VP9) in and out, MOV input, no-audio video hides t
   assert.equal(vstream(w).codec_name, 'vp9'); assert.equal(vstream(w).width, 640);
   assert.ok(Math.abs(Number(vstream(w).r_frame_rate.split('/')[0]) / Number(vstream(w).r_frame_rate.split('/')[1] || 1) - 15) < 1.5, `fps ${vstream(w).r_frame_rate}`);
   assert.ok(astream(w), 'audio kept'); assert.equal(astream(w).codec_name, 'opus');
-  // MOV container input
-  await loadVideo(page, v.mov);
+  // MOV container input (wait for THIS video's stats: the previous video's are still on screen until the new file is read)
+  await fileInput(page).setInputFiles(v.mov);
+  await root(page).locator('.result-grid', { hasText: '1280×720' }).first().waitFor({ timeout: 30000 });
   assert.match(await root(page).locator('.result-grid').first().innerText(), /1280×720/);
   // video without audio
-  await loadVideo(page, v.noaudio);
+  await fileInput(page).setInputFiles(v.noaudio);
+  await root(page).locator('.result-grid', { hasText: 'no audio' }).first().waitFor({ timeout: 30000 });
   assert.ok(await page.getByLabel('Audio').isHidden(), 'no audio track: option hidden');
-  assert.match(await root(page).locator('.result-grid').first().innerText(), /no audio/);
 });
 
 test('Video Compressor: invalid input, bad trim times, cancel, and the check that fake or damaged files are rejected', async () => {

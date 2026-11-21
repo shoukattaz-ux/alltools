@@ -20,10 +20,10 @@ const exe = ['/opt/pw-browsers/chromium', process.env.CHROMIUM_PATH].find((p) =>
 const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
 
 const FAKE_AD = `document.write('<div id="fake-ad" style="width:100%;height:100%;background:#fc0">ad-ok</div>');`;
-async function newCtx(opts = {}) {
+async function newCtx(opts = {}, body = FAKE_AD) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, ...opts });
   const adRequests = [];
-  await ctx.route('https://bauval.org/**', (r) => { adRequests.push(r.request().url()); return r.fulfill({ status: 200, contentType: 'text/javascript', body: FAKE_AD }); });
+  await ctx.route('https://bauval.org/**', (r) => { adRequests.push(r.request().url()); return r.fulfill({ status: 200, contentType: 'text/javascript', body }); });
   return { ctx, adRequests };
 }
 let failed = 0;
@@ -104,6 +104,37 @@ test('ad frame pages have their own headers: framable by this site only, noindex
   assert.equal(home.headers.get('x-frame-options'), 'DENY');
   assert.match(await (await fetch(`${base}/robots.txt`)).text(), /Disallow: \/ads\//);
   assert.ok(!/ads\//.test(readFileSync(join(out, 'sitemap-0.xml'), 'utf8')), 'ad frames are not in the sitemap');
+});
+
+test('?adsdebug=1 shows an on-page report: working ads say ok, failing ad scripts show the error', async () => {
+  const cases = [
+    ['working script', FAKE_AD, /ok: elements created by the ad script: [1-9]/, /status=ok/],
+    ['script that needs storage (blocked in the isolated frame)', "localStorage.setItem('a', 'b');", /error: .*(script error|localStorage)/i, /status=error/],
+    ['script that shows nothing', '/* no output */', /empty: elements created by the ad script: 0/, /status=empty/],
+  ];
+  for (const [label, body, msgRe, statusRe] of cases) {
+    const { ctx } = await newCtx({}, body);
+    const page = await ctx.newPage();
+    await page.goto(`${base}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
+    await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
+    for (const el of await page.locator('.ad-net iframe').all()) await el.scrollIntoViewIfNeeded();
+    const panel = page.locator('pre[role=log]');
+    await panel.waitFor();
+    await page.waitForFunction(([m]) => new RegExp(m, 'i').test(document.querySelector('pre[role=log]').textContent), [msgRe.source], { timeout: 15000 }).catch(() => {});
+    const text = await panel.innerText();
+    assert.match(text, /ADS DEBUG/, label); assert.match(text, /frame=created/, label);
+    assert.match(text, msgRe, `${label}: ${text.slice(0, 700)}`); assert.match(text, statusRe, label);
+    if (/storage/.test(label)) assert.match(text, /HINT: the ad script failed and this isolated frame blocks storage/, label);
+    if (/nothing/.test(label)) assert.match(text, /HINT: the ad script ran without errors but showed nothing/, label);
+    if (/working/.test(label)) assert.match(text, /HINT: the ad network placed content/, label);
+    await ctx.close();
+  }
+  // without ?adsdebug=1 there is no panel
+  const { ctx } = await newCtx();
+  const page = await ctx.newPage();
+  await page.goto(`${base}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
+  assert.equal(await page.locator('pre[role=log]').count(), 0);
+  await ctx.close();
 });
 
 test('banner choice follows the screen: desktop gets 728x90 where it fits, phones get 300x250 and never the wide banner', async () => {

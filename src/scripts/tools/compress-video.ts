@@ -74,7 +74,9 @@ export function mount(root: HTMLElement) {
   panel.append(modeSeg, modeNote, encodeRow, scaleRow, trimRow, trimHint, estimate, notes, h('div', { class: 'actions' }, goBtn, cancelBtn));
 
   /* ---------- helpers ---------- */
-  const revoke = () => { if (previewUrl) URL.revokeObjectURL(previewUrl); if (resultUrl) URL.revokeObjectURL(resultUrl); previewUrl = resultUrl = ''; };
+  /** Detach every player from its blob URL BEFORE releasing it, otherwise the browser tries to reload a revoked URL and logs an error. */
+  const detachPlayers = () => { for (const v of [player, ...result.querySelectorAll('video')]) { v.pause(); v.removeAttribute('src'); v.load(); } };
+  const revoke = () => { detachPlayers(); if (previewUrl) URL.revokeObjectURL(previewUrl); if (resultUrl) URL.revokeObjectURL(resultUrl); previewUrl = resultUrl = ''; };
   const stat = (k: string, v: string, hl = false) => h('div', { class: hl ? 'stat hl' : 'stat' }, h('div', { class: 'k', text: k }), h('div', { class: 'v', text: v, style: 'font-size:1.15rem' }));
 
   function readTrim(): { start: number | undefined; end: number | undefined; error?: string } {
@@ -280,7 +282,7 @@ export function mount(root: HTMLElement) {
     const origShare = file.size * (expected / Math.max(0.001, meta.src.duration)); // the part of the original that was kept
     const saved = 1 - blob.size / origShare;
     const name = `${safeBaseName(file.name, 'video')}-${lossless ? 'trimmed' : 'compressed'}.${container}`;
-    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    if (resultUrl) { result.querySelectorAll('video').forEach((v) => { v.pause(); v.removeAttribute('src'); v.load(); }); URL.revokeObjectURL(resultUrl); }
     resultUrl = URL.createObjectURL(blob);
     const summary = await describe(blob).catch(() => '');
     const better = blob.size < origShare;

@@ -8,6 +8,25 @@
 </head>
 <body>
 <script>
+  // Diagnostics only: reports problems to the parent page (text, no personal data). Used by ?adsdebug=1.
+  (function () {
+    var size = '728x90';
+    function send(type, msg) { try { parent.postMessage({ thAd: 1, type: type, size: size, msg: String(msg).slice(0, 240) }, '*'); } catch (e) {} }
+    window.addEventListener('error', function (e) { send('error', (e.message || 'script error') + ' @ ' + String(e.filename || '').slice(0, 70)); });
+    window.addEventListener('unhandledrejection', function (e) { send('error', 'promise: ' + (e.reason && e.reason.message || e.reason)); });
+    try { void localStorage.length; } catch (e) { send('info', 'storage is blocked in this isolated frame'); }
+    try { void document.cookie; } catch (e) { send('info', 'cookies are blocked in this isolated frame'); }
+    send('info', 'frame page loaded');
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var inner = Array.prototype.filter.call(document.body.querySelectorAll('*'), function (n) { return !/^(SCRIPT|STYLE|NOSCRIPT)$/.test(n.tagName); }).length;
+        var scripts = document.querySelectorAll('script[src]').length;
+        send(inner ? 'ok' : 'empty', 'elements created by the ad script: ' + inner + ' (external scripts on page: ' + scripts + ')');
+      }, 4000);
+    });
+  })();
+</script>
+<script>
   atOptions = {
     'key' : 'bff97ad5f8f26196cb49bfa41adfea78',
     'format' : 'iframe',
