@@ -122,11 +122,26 @@ test('?adsdebug=1 shows an on-page report: working ads say ok, failing ad script
     await panel.waitFor();
     await page.waitForFunction(([m]) => new RegExp(m, 'i').test(document.querySelector('pre[role=log]').textContent), [msgRe.source], { timeout: 15000 }).catch(() => {});
     const text = await panel.innerText();
-    assert.match(text, /ADS DEBUG/, label); assert.match(text, /frame=created/, label);
-    assert.match(text, msgRe, `${label}: ${text.slice(0, 700)}`); assert.match(text, statusRe, label);
-    if (/storage/.test(label)) assert.match(text, /HINT: the ad script failed and this isolated frame blocks storage/, label);
-    if (/nothing/.test(label)) assert.match(text, /HINT: the ad script ran without errors but showed nothing/, label);
-    if (/working/.test(label)) assert.match(text, /HINT: the ad network placed content/, label);
+    const ctxMsg = `${label}: ${text.slice(0, 900)}`;
+    assert.match(text, /ADS DEBUG/, ctxMsg); assert.match(text, /frame=created/, ctxMsg);
+    assert.match(text, msgRe, `${label}: ${text.slice(0, 700)}`); assert.match(text, statusRe, ctxMsg);
+    if (/storage/.test(label)) assert.match(text, /HINT: the ad script crashed and this isolated frame blocks storage/, ctxMsg);
+    if (/nothing/.test(label)) assert.match(text, /HINT: the ad script ran without errors but showed nothing/, ctxMsg);
+    if (/working/.test(label)) assert.match(text, /HINT: the ad network placed content/, ctxMsg);
+    await ctx.close();
+  }
+  // the network host cannot be reached at all (blocker, firewall): the report says so and does not blame storage
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await ctx.route('https://bauval.org/**', (r) => r.abort('blockedbyclient'));
+    const page = await ctx.newPage();
+    await page.goto(`${base}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
+    await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
+    for (const el of await page.locator('.ad-net iframe').all()) await el.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => /could not download the ad network script/.test(document.querySelector('pre[role=log]')?.textContent ?? ''), null, { timeout: 15000 });
+    const t = await page.locator('pre[role=log]').innerText();
+    assert.match(t, /failed to load from bauval\.org/); assert.match(t, /status=error/);
+    assert.ok(!/crashed and this isolated frame blocks storage/.test(t), 'a failed download must not be reported as a storage problem');
     await ctx.close();
   }
   // without ?adsdebug=1 there is no panel
