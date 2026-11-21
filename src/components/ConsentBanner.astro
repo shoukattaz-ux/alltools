@@ -1,7 +1,7 @@
 ---
 /** Only rendered when optional analytics or advertising is configured. Nothing optional loads before the visitor accepts. */
-import { SITE, hasOptionalTracking } from '../data/site';
-const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+import { SITE, hasOptionalTracking, adsterraOn, adsenseOn } from '../data/site';
+const adsOn = adsterraOn() || adsenseOn();
 ---
 {hasOptionalTracking() && (
   <>
@@ -20,7 +20,7 @@ const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
         <button class="btn btn-primary" type="button" data-consent="granted">Accept</button>
       </div>
     </dialog>
-    <div hidden data-consent-config data-ga={SITE.analyticsId} data-adsense={adsOn ? SITE.adsense.client : ''}></div>
+    <div hidden data-consent-config data-ga={SITE.analyticsId} data-adsense={adsenseOn() ? SITE.adsense.client : ''} data-adsterra={adsterraOn() ? '1' : ''}></div>
     <script>
       import '../scripts/consent';
     </script>

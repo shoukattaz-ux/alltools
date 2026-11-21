@@ -1,18 +1,25 @@
 ---
 /**
- * Advertising container. Renders NOTHING unless ads are enabled in the environment, an ad client ID is set,
- * and this placement has an ad-unit slot ID in src/data/ads.ts. See docs/ADVERTISING.md.
+ * Advertising container. Renders NOTHING unless ads are enabled in the environment (PUBLIC_ADS_ENABLED=true) and this placement
+ * has a configured network. Ad scripts are never loaded here: src/scripts/consent.ts creates the ad after the visitor consents.
  */
 import { SITE } from '../data/site';
-import { AD_SLOTS, type AdPlacement } from '../data/ads';
+import { AD_SLOTS, adsterraConfigured, type AdPlacement } from '../data/ads';
 interface Props { placement: AdPlacement }
 const { placement } = Astro.props;
 const cfg = AD_SLOTS[placement];
-const active = SITE.adsEnabled && SITE.adsense.client && cfg.slot;
+const useAdsterra = SITE.adsEnabled && adsterraConfigured() && !!cfg.adsterra;
+const useAdsense = SITE.adsEnabled && !!SITE.adsense.client && !!cfg.slot && !useAdsterra;
 ---
-{active && (
-  <aside class="ad" aria-label="Advertisement" style={`min-height:${cfg.minHeight}px`}>
+{useAdsterra && (
+  <div class="ad ad-net" role="group" aria-label="Advertisement" data-ad-choice={cfg.adsterra} data-ad-placement={placement} style={`min-height:${cfg.minHeight}px`}>
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame" data-ad-frame></div>
+  </div>
+)}
+{useAdsense && (
+  <div class="ad" role="group" aria-label="Advertisement" style={`min-height:${cfg.minHeight}px`}>
     <span class="ad-label">Advertisement</span>
     <ins class="adsbygoogle" style="display:block" data-ad-client={SITE.adsense.client} data-ad-slot={cfg.slot} data-ad-format="auto" data-full-width-responsive="true"></ins>
-  </aside>
+  </div>
 )}

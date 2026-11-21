@@ -18,6 +18,10 @@
 
 ## Before enabling ads / analytics / affiliate links
 
+- [ ] Pop-under and social-bar units paused or deleted in the Adsterra dashboard; adult/risky ad categories blocked if the option exists.
+- [ ] Site added and approved in the ad network dashboard (approval is their decision).
+- [ ] `PUBLIC_ADS_ENABLED=true` set as a Cloudflare **build** variable, redeployed, and checked in a private window (banner appears, nothing loads before Accept).
+
 - [ ] Publisher approval received (don't assume it); follow docs/ADVERTISING.md.
 - [ ] CSP extended deliberately and tested; consent flow tested (reject = no third-party requests).
 - [ ] Certified CMP in place for EEA/UK/CH traffic if serving personalised ads.
@@ -38,7 +42,7 @@
 | Production build (48 pages) | passes |
 | Type check (`astro check`) | 0 errors, 0 warnings |
 | ESLint | clean |
-| Unit tests | 107 passing |
+| Unit tests | 108 passing |
 | E2E (Chromium, real files, all 16 tools, CSP enforced) | 34 passing |
 | axe-core WCAG 2 A/AA + best-practice on 25 pages + the signer with every dialog open | 0 violations |
 | Post-build verifier (titles, descriptions, canonicals, one H1, heading order, links, sitemap, no inline scripts) | passes |

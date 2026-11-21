@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { TOOLS, TOOL_UI_HEIGHT, CATEGORIES } from '../../src/data/tools';
-import { AD_SLOTS } from '../../src/data/ads';
+import { AD_SLOTS, ADSTERRA_UNITS } from '../../src/data/ads';
 
 describe('tool definitions (SEO + completeness)', () => {
   it('has the 16 tools: 6 PDF, 5 image, 1 video, 4 calculators (Loan Calculator was removed)', () => {
@@ -60,7 +60,22 @@ describe('removed content', () => {
 });
 
 describe('advertising config', () => {
-  it('ships with every ad slot empty (no fabricated IDs)', () => {
+  it('ships with every AdSense slot empty (no fabricated IDs)', () => {
     for (const s of Object.values(AD_SLOTS)) expect(s.slot).toBe('');
+  });
+  it('Adsterra units are banner-only, well-formed, and match the frame pages exactly', () => {
+    for (const [size, u] of Object.entries(ADSTERRA_UNITS)) {
+      expect(`${u.width}x${u.height}`).toBe(size);
+      expect(u.key).toMatch(/^[0-9a-f]{32}$/);
+      const page = readFileSync(`public${u.frame}`, 'utf8');
+      expect(page).toContain(`'key' : '${u.key}'`);
+      expect(page).toContain(`'height' : ${u.height}`); expect(page).toContain(`'width' : ${u.width}`);
+      expect(page).toContain(`/22/${u.key}"`);
+      expect(page).toMatch(/noindex/);
+    }
+    // only banner formats: no pop-under / social-bar / smartlink code anywhere in the shipped source
+    const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`]));
+    const code = (f: string) => readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
+    for (const f of [...walk('src'), ...walk('public/ads')]) expect(code(f), f).not.toMatch(/popunder|pop-under\s*:|socialbar|smartlink|window\.open\(|location\.(href|replace)\s*=\s*['"]https?:/i);
   });
 });

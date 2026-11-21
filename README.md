@@ -24,10 +24,11 @@ npm run build        # production build into dist/
 npm run preview      # serve dist/ locally
 npm run check        # TypeScript / Astro type check
 npm run lint         # ESLint
-npm test             # 107 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
+npm test             # 108 unit tests (calculators, page ranges, file validation, signature placement maths, content integrity)
 npm run verify       # post-build checks: SEO tags, links, sitemap, headings, inline scripts
 npm run test:e2e     # 34 real-browser tests of every tool + a11y (axe-core); run after build
 npm run test:cls     # layout-shift measurement of all tool pages
+npm run test:ads     # builds with ads enabled and tests consent gating, sandboxing and per-path headers
 npm run ci           # everything above in order
 ```
 
@@ -69,7 +70,7 @@ Premium-SaaS look: indigo brand with teal accent, Inter typography, layered shad
 - **Strict CSP.** `script-src 'self'`, no inline scripts. Enabling third-party ads/analytics requires extending it (docs/ADVERTISING.md).
 - **Signer exports onto the original pages.** The PDF Signer draws signature images with pdf-lib onto the untouched pages (text stays selectable) and handles `/Rotate` and crop boxes; a test re-renders signed pages at 0/90/180/270° to confirm placement. It adds an *image* of a signature, not a certificate-based digital signature, and says so on the page.
 - **Honest tools.** PDF compression offers a lossless mode and image-based modes, states the trade-offs, shows real before/after sizes and flags results that are *larger*.
-- **Ads and tracking are off** until configured; optional scripts load only after consent.
+- **Ads and tracking are off** until configured; optional scripts load only after consent. Banner ads run in sandboxed iframes on their own pages, so the ad network's code is isolated from the site (docs/ADVERTISING.md).
 
 ## Known limitations
 

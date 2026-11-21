@@ -14,8 +14,9 @@
     "test": "vitest run",
     "test:e2e": "node tests/e2e/run.mjs",
     "verify": "node scripts/verify-site.mjs",
-    "ci": "npm run lint && npm run check && npm test && npm run build && npm run verify && npm run test:e2e",
-    "test:cls": "node tests/e2e/cls.mjs"
+    "ci": "npm run lint && npm run check && npm test && npm run build && npm run verify && npm run test:e2e && npm run test:ads",
+    "test:cls": "node tests/e2e/cls.mjs",
+    "test:ads": "node tests/e2e/ads.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

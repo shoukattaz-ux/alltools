@@ -1,7 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, hasOptionalTracking } from '../data/site';
-const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+import { SITE, hasOptionalTracking, adsterraOn, adsenseOn } from '../data/site';
+const adsOn = adsterraOn() || adsenseOn();
+const adNetworks = [adsterraOn() ? 'Adsterra' : '', adsenseOn() ? 'Google AdSense' : ''].filter(Boolean).join(' and ');
 const gaOn = !!SITE.analyticsId;
 ---
 <Base title="Cookie Policy" description={`Which cookies and similar technologies ${SITE.name} uses: none by default, with optional analytics or advertising only after you give consent.`} breadcrumbs={[{ name: 'Cookie policy', href: '/cookies/' }]}>
@@ -29,7 +30,7 @@ const gaOn = !!SITE.analyticsId;
 
     <h2>Advertising</h2>
     {adsOn ? (
-      <p>With your consent, Google AdSense is loaded. Google and its partners may set or read cookies to deliver, limit the frequency of, and measure advertisements, and may personalise them. Not loaded if you reject.</p>
+      <p>With your consent, banner advertising from {adNetworks} is loaded. These providers and their partners may set or read cookies to deliver, limit the frequency of, and measure advertisements, and may personalise them. The ads run in an isolated frame on this site. Nothing is loaded if you reject.</p>
     ) : (
       <p>Not currently used. If advertising is added, it will be loaded only after consent, and this page will be updated.</p>
     )}

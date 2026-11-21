@@ -512,3 +512,7 @@ noscript .notice { margin: 12px 0; }
 /* Video compressor */
 .video-box { margin-top: 16px; border-radius: 16px; overflow: hidden; background: #0b1020; border: 1px solid var(--line); }
 .video-box video { display: block; width: 100%; max-height: 380px; background: #000; }
+
+/* Ad frames (network banners run in sandboxed iframes) */
+.ad-net .ad-frame { display: flex; justify-content: center; }
+.ad-net iframe { display: block; border: 0; max-width: 100%; background: transparent; }

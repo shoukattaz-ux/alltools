@@ -9,16 +9,33 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const dist = process.env.DIST_DIR ? resolve(process.env.DIST_DIR) : join(root, 'dist');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.xml': 'application/xml', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json', '.map': 'application/json' };
 
-function globalHeaders() {
+/** Parses public/_headers the way Cloudflare applies it: blocks in file order, same header values are merged, "! Name" detaches. */
+function parseHeaders() {
   const text = readFileSync(join(dist, '_headers'), 'utf8');
-  const block = text.split(/\n(?=\S)/).find((b) => b.startsWith('/*')) ?? '';
+  const blocks = [];
+  for (const chunk of text.split(/\n(?=\/)/)) {
+    const lines = chunk.split('\n').filter((l) => l.trim() && !l.trim().startsWith('#'));
+    if (!lines.length || !lines[0].startsWith('/')) continue;
+    blocks.push({ pattern: lines[0].trim(), rules: lines.slice(1).map((l) => l.trim()) });
+  }
+  return blocks;
+}
+const matches = (pattern, path) => (pattern.endsWith('/*') ? path.startsWith(pattern.slice(0, -1)) || path === pattern.slice(0, -2) : pattern === path);
+function headersFor(blocks, path) {
   const out = {};
-  for (const line of block.split('\n').slice(1)) { const m = /^\s+([\w-]+):\s*(.+)$/.exec(line); if (m) out[m[1]] = m[2]; }
+  for (const b of blocks) {
+    if (!matches(b.pattern, path)) continue;
+    for (const r of b.rules) {
+      if (r.startsWith('! ')) { delete out[r.slice(2).trim()]; continue; }
+      const m = /^([\w-]+):\s*(.+)$/.exec(r); if (!m) continue;
+      out[m[1]] = out[m[1]] ? `${out[m[1]]}, ${m[2]}` : m[2];
+    }
+  }
   return out;
 }
 
 export function startServer(port = 0) {
-  const hdr = globalHeaders();
+  const blocks = parseHeaders();
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, 'http://x');
     let path = decodeURIComponent(url.pathname);
@@ -29,7 +46,7 @@ export function startServer(port = 0) {
     if (isDir) file = join(file, 'index.html');
     let status = 200;
     if (!existsSync(file)) { file = join(dist, '404.html'); status = 404; }
-    const headers = { ...hdr, 'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream' };
+    const headers = { ...headersFor(blocks, path), 'Content-Type': TYPES[extname(file)] ?? 'application/octet-stream' };
     delete headers['Strict-Transport-Security'];
     res.writeHead(status, headers);
     res.end(readFileSync(file));

@@ -2,6 +2,8 @@
  * Central site configuration. Change the brand name here and everything (header, footer, titles, legal pages) follows.
  * Values prefixed PUBLIC_ come from environment variables (see .env.example) and are NOT secret.
  */
+import { adsterraConfigured } from './ads';
+
 const env = import.meta.env;
 
 export const SITE = {
@@ -26,7 +28,9 @@ export const SITE = {
   adsEnabled: String(env.PUBLIC_ADS_ENABLED || '').toLowerCase() === 'true',
 } as const;
 
-export const hasOptionalTracking = () => Boolean(SITE.analyticsId) || (SITE.adsEnabled && Boolean(SITE.adsense.client));
+export const adsterraOn = () => SITE.adsEnabled && adsterraConfigured();
+export const adsenseOn = () => SITE.adsEnabled && Boolean(SITE.adsense.client);
+export const hasOptionalTracking = () => Boolean(SITE.analyticsId) || adsenseOn() || adsterraOn();
 
 export const NAV = [
   { href: '/tools/', label: 'All tools' },

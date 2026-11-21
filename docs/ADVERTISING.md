@@ -9,7 +9,30 @@
 - No auto-refresh, no pop-ups/interstitials, no redirects, no fake alerts, no deceptive download buttons.
 - Third-party scripts load only **after consent** (`src/scripts/consent.ts`), and a "Cookie settings" link in the footer lets visitors change their mind.
 
-## Enabling Google AdSense (after approval)
+## Adsterra banners (configured)
+
+Two banner units are wired in (`src/data/ads.ts`): **300x250** and **728x90**. Their keys are public by design. Only banners are
+supported. **Pop-unders, smartlinks and social bars are deliberately not supported**: they break this site's promise of no pop-ups
+and no forced redirects, annoy visitors, and risk penalties. Keep those units paused or deleted in the Adsterra dashboard.
+
+How it works:
+- Placement: tool pages (under the instructions, between sections on wide screens, sidebar), guides (inside the article), homepage (two spots). Never inside the tool, never near Download buttons.
+- Banner choice: the 728x90 leaderboard is used only on screens 800 px wide or more; phones get the 300x250. The 728 banner is never loaded on a phone.
+- Consent: nothing from the ad network loads until the visitor presses Accept. Rejecting keeps ads off.
+- Isolation: each banner runs in a **sandboxed iframe without `allow-same-origin`** that loads `/ads/300x250.html` or `/ads/728x90.html`. The ad network's code cannot read this site's pages, cookies or storage, and can only navigate the page after a real click.
+- Headers: `public/_headers` gives `/ads/*` its own policy (detaching the strict site policy for those two files only). The rest of the site keeps `script-src 'self'`.
+- `/ads/` is `noindex`, disallowed in robots.txt and not in the sitemap.
+- Reserved height on every slot, so ads cause no layout shift.
+
+**To switch ads on:** in Cloudflare open the Worker, **Settings → Builds → Build variables and secrets**, add `PUBLIC_ADS_ENABLED` = `true`, then redeploy. To switch them off, set it to `false` (or delete it). A consent banner appears automatically when ads are on.
+
+Check after enabling (private window): the banner appears; nothing from `bauval.org` loads until Accept (DevTools → Network); after Accept, boxes labelled "Advertisement" show the ads. If a box stays empty, the network may have no ad to serve (no fill) or the site may not be approved yet in the Adsterra dashboard.
+
+`npm run test:ads` builds the site with ads enabled and verifies all of this in a real browser (with a stand-in for the network's script, since the real one is not reachable from the test environment). It cannot prove that real ads render: only a live check can.
+
+Update the frame pages if Adsterra gives you new code: keep `atOptions` and the script exactly as provided, and keep the sandbox.
+
+## Google AdSense (optional, after approval)
 
 1. Apply with the production domain live. Once approved, create ad units in AdSense and note each **slot ID**.
 2. Build-time environment variables: `PUBLIC_ADS_ENABLED=true`, `PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX`.

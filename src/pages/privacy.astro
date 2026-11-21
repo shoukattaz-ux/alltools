@@ -1,7 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE, hasOptionalTracking } from '../data/site';
-const adsOn = SITE.adsEnabled && !!SITE.adsense.client;
+import { SITE, hasOptionalTracking, adsterraOn, adsenseOn } from '../data/site';
+const adsOn = adsterraOn() || adsenseOn();
+const adNetworks = [adsterraOn() ? 'Adsterra' : '', adsenseOn() ? 'Google AdSense' : ''].filter(Boolean).join(' and ');
 const gaOn = !!SITE.analyticsId;
 ---
 <Base title="Privacy Policy" description={`How ${SITE.name} handles your information: files are processed in your browser, we do not require accounts, and optional analytics or advertising only load with your consent.`} breadcrumbs={[{ name: 'Privacy policy', href: '/privacy/' }]}>
@@ -32,7 +33,7 @@ const gaOn = !!SITE.analyticsId;
 
     <h2>5. Advertising</h2>
     {adsOn ? (
-      <p>With your consent, this site displays advertising served by Google AdSense. Advertising providers may set cookies or use similar technologies to show and measure ads, and may personalise them. These are not loaded unless you accept. Ads are labelled and are never placed inside the tool controls.</p>
+      <p>With your consent, this site displays banner advertising served by {adNetworks}. Advertising providers may set cookies or use similar technologies to show and measure ads, and may personalise them. They may receive your IP address and device information when an ad loads. Nothing is loaded from them unless you accept. Banner ads run in an isolated frame that cannot read this site's pages, and are labelled and never placed inside the tool controls. We do not use pop-ups or pop-unders.</p>
     ) : (
       <p>This site currently shows no advertising. We intend to use display advertising and possibly affiliate links in future. When we do, we will update this policy and our <a href="/cookies/">Cookie Policy</a>, label ads clearly, and ask for consent where required. Affiliate links, if used, will be disclosed.</p>
     )}
@@ -47,7 +48,7 @@ const gaOn = !!SITE.analyticsId;
     <p>Where the UK GDPR or EU GDPR applies, we rely on legitimate interests for the technical data in section 3 (running and securing the site), on your consent for optional analytics and advertising cookies, and on legitimate interests or the steps you request for replying to messages.</p>
 
     <h2>9. Sharing</h2>
-    <p>We do not sell personal information. Data may be processed by our infrastructure provider (Cloudflare){gaOn ? ', Google (analytics, with consent)' : ''}{adsOn ? ' and advertising partners (with consent)' : ''}, and may be disclosed if required by law.</p>
+    <p>We do not sell personal information. Data may be processed by our infrastructure provider (Cloudflare){gaOn ? ', Google (analytics, with consent)' : ''}{adsOn ? ` and advertising partners (${adNetworks}, with consent)` : ''}, and may be disclosed if required by law.</p>
 
     <h2>10. International transfers</h2>
     <p>Our providers operate globally, so technical data may be processed outside your country. Where required, providers rely on recognised transfer mechanisms.</p>

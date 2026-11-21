@@ -25,7 +25,7 @@ let ownerTodos = 0;
 for (const f of pages) {
   const url = rel(f);
   const html = readFileSync(f, 'utf8');
-  if (url === '/404.html') continue;
+  if (url === '/404.html' || url.startsWith('/ads/')) continue; // ad frames are deliberately minimal, noindex, and not part of the site's pages
   const get = (re) => (re.exec(html) || [])[1];
   const title = get(/<title>([^<]*)<\/title>/), desc = get(/<meta name="description" content="([^"]*)"/), canon = get(/<link rel="canonical" href="([^"]*)"/);
   if (!title) err(url, 'missing <title>'); else { if (title.length > 70) warnings.push(`${url}: title is ${title.length} chars`); (titles.get(title) ?? titles.set(title, []).get(title)).push(url); }
@@ -58,7 +58,7 @@ for (const [k, v] of canonicals) if (v.length > 1) err(v.join(', '), `duplicate 
 const sitemapFiles = files.filter((f) => /sitemap-\d+\.xml$/.test(f));
 const sitemap = sitemapFiles.map((f) => readFileSync(f, 'utf8')).join('');
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
-const indexable = pages.map(rel).filter((u) => u !== '/404.html');
+const indexable = pages.map(rel).filter((u) => u !== '/404.html' && !u.startsWith('/ads/'));
 for (const u of indexable) if (!locs.includes(u)) err('sitemap', `missing ${u}`);
 for (const l of locs) if (!urlExists(l)) err('sitemap', `lists nonexistent ${l}`);
 if (!existsSync(join(root, 'sitemap-index.xml'))) err('sitemap', 'sitemap-index.xml missing');

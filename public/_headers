@@ -29,3 +29,14 @@
 
 /og-image.png
   Cache-Control: public, max-age=86400
+
+# Ad frames: each banner runs in a sandboxed iframe (no allow-same-origin) that loads one of these pages.
+# They need a looser policy than the rest of the site, so the strict policy is detached here and replaced.
+# Only our own pages may frame them. Do not add other pages under /ads/.
+/ads/*
+  ! Content-Security-Policy
+  ! X-Frame-Options
+  ! Cross-Origin-Opener-Policy
+  Content-Security-Policy: default-src https: data: blob:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'; img-src https: data: blob:; media-src https: blob:; frame-src https:; connect-src https:; base-uri 'none'; form-action https:; frame-ancestors 'self'
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=3600
