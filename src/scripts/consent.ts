@@ -24,7 +24,7 @@ const FRAMES: Record<string, { w: number; h: number; src: string }> = {
   '300x250': { w: 300, h: 250, src: '/ads/300x250/' },
   '728x90': { w: 728, h: 90, src: '/ads/728x90/' },
 };
-function mountBannerAds() {
+function mountBannerAds(frameOrigin: string) {
   const wide = window.matchMedia('(min-width: 800px)').matches;
   document.querySelectorAll<HTMLElement>('.ad-net[data-ad-choice]').forEach((box) => {
     if (box.dataset.mounted) return;
@@ -37,10 +37,17 @@ function mountBannerAds() {
     box.dataset.mounted = '1';
     box.style.minHeight = `${h + 28}px`;
     const frame = document.createElement('iframe');
-    frame.src = src; frame.width = String(w); frame.height = String(h); frame.title = 'Advertisement';
+    // The frame lives on its own origin (ads.<domain>). Only then is it safe to allow its own storage: it can never touch this site.
+    let origin = '';
+    let separateOrigin = false;
+    try { const o = new URL(frameOrigin, location.href).origin; origin = o; separateOrigin = o !== location.origin; } catch { /* fall back to the strict sandbox on this origin */ }
+    frame.src = `${separateOrigin ? origin : ''}${src}`; frame.width = String(w); frame.height = String(h); frame.title = 'Advertisement';
     frame.loading = 'lazy'; frame.setAttribute('scrolling', 'no'); frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-    // No allow-same-origin: the ad cannot read this site's DOM, cookies or storage. Navigation needs a real click.
-    frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
+    // allow-same-origin is added ONLY when the frame is on a different origin than this page (so it cannot reach our DOM, cookies or
+    // storage). On the same origin it is never added. Navigation by the ad needs a real click.
+    frame.setAttribute('sandbox', `allow-scripts ${separateOrigin ? 'allow-same-origin ' : ''}allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation`);
+    box.dataset.frameOrigin = separateOrigin ? origin : 'same-origin (strict sandbox)';
+    mountedAt = mountedAt || Date.now();
     holder.append(frame);
   });
 }
@@ -48,6 +55,7 @@ function mountBannerAds() {
 /* ---- ?adsdebug=1: a small on-page report so ad problems can be diagnosed without developer tools ---- */
 const debugOn = /[?&]adsdebug=1\b/.test(location.search);
 const adLog: string[] = [];
+let mountedAt = 0;
 let panel: HTMLElement | null = null;
 function hints(): string[] {
   const all = adLog.join('\n');
@@ -55,6 +63,7 @@ function hints(): string[] {
   const loadFailed = /failed to load from/.test(all);
   // A runtime error from the ad script itself (not just a failed download)
   const runtimeError = adLog.some((l) => /error:/.test(l) && !/failed to load from/.test(l));
+  if (mountedAt && Date.now() - mountedAt > 9000 && !adLog.length) out.push('HINT: the ad frames have not reported anything. If the frame address (ads.<your domain>) is not set up as a Custom domain on the Worker, the frames cannot load. See docs/ADVERTISING.md.');
   if (loadFailed) out.push('HINT: this browser could not download the ad network script. Something between you and the ad server is blocking or timing out: an ad blocker, privacy browser, DNS filter, VPN/firewall, internet provider, or the ad server itself. This is not caused by the site. Try mobile data, another browser or turning blockers off.');
   if (runtimeError && /storage is blocked|cookies are blocked/.test(all)) out.push('HINT: the ad script crashed and this isolated frame blocks storage/cookies. The network script probably needs them.');
   else if (runtimeError) out.push('HINT: the ad script reported an error (browsers hide the details of third-party script errors).');
@@ -74,7 +83,7 @@ function renderDebug() {
   const head = [
     'ADS DEBUG (text only, safe to screenshot)',
     `consent saved: ${read() ?? 'none'} | screen: ${innerWidth}px wide | ad boxes on page: ${boxes.length}`,
-    ...boxes.map((b, i) => `box ${i + 1}: ${b.dataset.adPlacement} choice=${b.dataset.adChoice} mounted=${b.dataset.mounted ? 'yes' : 'no'} hidden=${b.hidden ? 'yes' : 'no'} frame=${b.querySelector('iframe') ? 'created' : 'none'} status=${b.dataset.adStatus ?? 'waiting'}`),
+    ...boxes.map((b, i) => `box ${i + 1}: ${b.dataset.adPlacement} choice=${b.dataset.adChoice} mounted=${b.dataset.mounted ? 'yes' : 'no'} hidden=${b.hidden ? 'yes' : 'no'} frame=${b.querySelector('iframe') ? 'created' : 'none'} origin=${b.dataset.frameOrigin ?? '-'} status=${b.dataset.adStatus ?? 'waiting'}`),
     ...hints(),
     '--- messages from ad frames ---',
   ];
@@ -98,7 +107,7 @@ function loadOptional() {
   if (loaded || !cfg) return;
   loaded = true;
   const ga = cfg.dataset.ga, adsense = cfg.dataset.adsense;
-  if (cfg.dataset.adsterra) mountBannerAds();
+  if (cfg.dataset.adsterra) mountBannerAds(cfg.dataset.frameOrigin ?? '');
   if (ga && /^G-[A-Z0-9]+$/.test(ga)) {
     const w = window as unknown as { dataLayer: unknown[]; gtag: (...a: unknown[]) => void };
     w.dataLayer = w.dataLayer || [];

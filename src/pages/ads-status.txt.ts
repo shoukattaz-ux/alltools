@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { SITE, adsterraOn, adsenseOn, hasOptionalTracking } from '../data/site';
-import { AD_SLOTS, ADSTERRA_UNITS } from '../data/ads';
+import { AD_SLOTS, ADSTERRA_UNITS, adsFrameOrigin } from '../data/ads';
 
 /** /ads-status.txt: a plain-text, public, non-sensitive report of how ads were configured when this version was built. */
 export const GET: APIRoute = () => {
@@ -15,7 +15,7 @@ export const GET: APIRoute = () => {
     '',
   ];
   if (SITE.adsEnabled) {
-    lines.push('Banner units:');
+    lines.push(`Ad frame address: ${adsFrameOrigin(SITE.url)} (add it as a Custom domain on the Worker; see docs/ADVERTISING.md)`, '', 'Banner units:');
     for (const [size, u] of Object.entries(ADSTERRA_UNITS)) lines.push(`  ${size}: key ${u.key.slice(0, 6)}…, frame ${u.frame}`);
     lines.push('', 'Placements:');
     for (const [name, c] of Object.entries(AD_SLOTS)) lines.push(`  ${name}: ${c.adsterra ?? 'none'}`);

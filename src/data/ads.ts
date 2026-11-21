@@ -35,4 +35,14 @@ export const AD_SLOTS: Record<AdPlacement, { slot: string; minHeight: number; ad
   sidebar: { slot: '', minHeight: 250, adsterra: '300x250' },
 };
 
+/**
+ * Ads run on their own ORIGIN (ads.<your domain>), served by the same Worker. A different origin is what makes it safe to give the
+ * ad frame its own storage/cookies (sandbox "allow-same-origin"): it still cannot read this site's pages, cookies or storage.
+ * This host must also be listed in public/_headers (frame-src on the site, frame-ancestors on /ads/*).
+ */
+export const adsFrameOrigin = (siteUrl: string) => {
+  const u = new URL(siteUrl);
+  return `${u.protocol}//ads.${u.hostname.replace(/^www\./, '')}`;
+};
+
 export const adsterraConfigured = () => Object.values(AD_SLOTS).some((s) => s.adsterra) && Object.values(ADSTERRA_UNITS).every((u) => /^[0-9a-f]{32}$/.test(u.key));

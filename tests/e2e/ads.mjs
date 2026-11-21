@@ -15,13 +15,24 @@ execFileSync('npx', ['astro', 'build', '--outDir', out], { cwd: root, env: { ...
 process.env.DIST_DIR = out;
 const { startServer } = await import('./server.mjs');
 const { server, port } = await startServer();
-const base = `http://127.0.0.1:${port}`;
+const base = `http://127.0.0.1:${port}`; // Node-side header checks
+// Browser tests use the real hostnames (the page on the main site, ad frames on ads.<domain>), both served by the local test server,
+// so the browser sees genuinely different origins.
+const site = 'https://getalltools.shop';
+const adsHost = 'https://ads.getalltools.shop';
+async function routeSite(ctx) {
+  await ctx.route(/^https:\/\/(ads\.)?getalltools\.shop\//, async (r) => {
+    const u = new URL(r.request().url());
+    try { const res = await r.fetch({ url: base + u.pathname + u.search }); await r.fulfill({ response: res }); } catch { /* context closed mid-request */ }
+  });
+}
 const exe = ['/opt/pw-browsers/chromium', process.env.CHROMIUM_PATH].find((p) => p && existsSync(p));
 const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
 
 const FAKE_AD = `document.write('<div id="fake-ad" style="width:100%;height:100%;background:#fc0">ad-ok</div>');`;
 async function newCtx(opts = {}, body = FAKE_AD) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, ...opts });
+  await routeSite(ctx);
   const adRequests = [];
   await ctx.route('https://bauval.org/**', (r) => { adRequests.push(r.request().url()); return r.fulfill({ status: 200, contentType: 'text/javascript', body }); });
   return { ctx, adRequests };
@@ -33,7 +44,7 @@ const test = (name, fn) => tests.push({ name, fn });
 test('nothing from the ad network loads before consent; reject keeps it that way', async () => {
   const { ctx, adRequests } = await newCtx();
   const page = await ctx.newPage();
-  await page.goto(`${base}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
+  await page.goto(`${site}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
   assert.ok(await page.locator('[data-consent-banner]').isVisible(), 'consent banner shown');
   assert.equal(await page.locator('.ad-net iframe').count(), 0, 'no ad frames before consent');
   assert.equal(adRequests.length, 0);
@@ -50,15 +61,15 @@ test('nothing from the ad network loads before consent; reject keeps it that way
 test('after accepting: banner frames are created with the right sizes, sandboxed, and the ad script runs only inside them', async () => {
   const { ctx, adRequests } = await newCtx();
   const page = await ctx.newPage();
-  await page.goto(`${base}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
+  await page.goto(`${site}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
   await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
   await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
   const frames = await page.locator('.ad-net iframe').evaluateAll((els) => els.map((e) => ({ src: e.getAttribute('src'), w: e.width, h: e.height, sandbox: e.getAttribute('sandbox'), title: e.title, lazy: e.loading })));
   assert.equal(frames.length, 3);
   assert.deepEqual(frames.map((f) => `${f.w}x${f.h}`).sort(), ['300x250', '300x250', '728x90']);
   for (const f of frames) {
-    assert.match(f.src, /^\/ads\/(300x250|728x90)\/$/);
-    assert.ok(!/allow-same-origin/.test(f.sandbox), 'ad frames must not be same-origin');
+    assert.match(f.src, /^https:\/\/ads\.getalltools\.shop\/ads\/(300x250|728x90)\/$/, 'ad frames live on their own origin');
+    assert.ok(/allow-same-origin/.test(f.sandbox), 'on a separate origin the ad gets its own storage (allow-same-origin)');
     assert.ok(/allow-scripts/.test(f.sandbox) && /allow-popups/.test(f.sandbox) && /allow-top-navigation-by-user-activation/.test(f.sandbox));
     assert.ok(!/allow-top-navigation(?!-by)/.test(f.sandbox), 'no forced top navigation');
     assert.equal(f.title, 'Advertisement'); assert.equal(f.lazy, 'lazy');
@@ -69,13 +80,14 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   await page.waitForTimeout(1500);
   assert.ok(adRequests.length >= 2, `ad script requested after consent (${adRequests.length})`);
   assert.ok(adRequests.every((u) => /bauval\.org\/22\/(e7f4f2349f0b5f09bce2bc02ff2e0975|bff97ad5f8f26196cb49bfa41adfea78)$/.test(u)), adRequests.join(', '));
-  const first = page.frames().find((f) => f.url().endsWith('/ads/300x250/'));
+  const first = page.frames().find((f) => f.url() === `${adsHost}/ads/300x250/`);
   assert.ok(first, 'ad frame document loaded');
   assert.equal(await first.locator('#fake-ad').count(), 1, 'the ad script executed inside the frame (inline atOptions + external script allowed there)');
   const isolation = await first.evaluate(() => { try { return String(window.parent.document.title); } catch (e) { return 'blocked:' + e.name; } });
   assert.match(isolation, /^blocked:/, 'ad frame cannot read the parent page');
-  const storage = await first.evaluate(() => { try { return String(localStorage.length); } catch (e) { return 'blocked:' + e.name; } });
-  assert.match(storage, /^blocked:/, 'ad frame has no access to site storage');
+  const leaked = await first.evaluate(() => { try { return localStorage.getItem('th-consent') + '|' + document.cookie; } catch (e) { return 'blocked:' + e.name; } });
+  assert.equal(leaked, 'null|', "ad frame has its own storage and cannot see the site's consent record or cookies");
+  assert.equal(new URL(first.url()).origin !== new URL(page.url()).origin, true, 'frame origin differs from the page origin');
   // the main page keeps its strict policy and never ran the ad network script itself
   const csp = await page.evaluate(async () => (await fetch('/tools/merge-pdf/')).headers.get('content-security-policy'));
   assert.match(csp, /script-src 'self';/); assert.ok(!/bauval/.test(csp));
@@ -95,7 +107,7 @@ test('status page reports that ads are enabled and which network and slots are a
 test('ad frame pages have their own headers: framable by this site only, noindex, looser script policy', async () => {
   const res = await fetch(`${base}/ads/300x250/`);
   const csp = res.headers.get('content-security-policy');
-  assert.match(csp, /frame-ancestors 'self'/); assert.match(csp, /script-src https:/);
+  assert.match(csp, /frame-ancestors https:\/\/getalltools\.shop/); assert.match(csp, /script-src https:/);
   assert.ok(!/default-src 'self'; script-src 'self'/.test(csp), 'the strict site policy was detached, not merged');
   assert.equal(res.headers.get('x-frame-options'), null);
   assert.match(res.headers.get('x-robots-tag') ?? '', /noindex/);
@@ -109,13 +121,13 @@ test('ad frame pages have their own headers: framable by this site only, noindex
 test('?adsdebug=1 shows an on-page report: working ads say ok, failing ad scripts show the error', async () => {
   const cases = [
     ['working script', FAKE_AD, /ok: elements created by the ad script: [1-9]/, /status=ok/],
-    ['script that needs storage (blocked in the isolated frame)', "localStorage.setItem('a', 'b');", /error: .*(script error|localStorage)/i, /status=error/],
+    ['script that crashes', "throw new Error('boom');", /error: .*(script error|boom)/i, /status=error/],
     ['script that shows nothing', '/* no output */', /empty: elements created by the ad script: 0/, /status=empty/],
   ];
   for (const [label, body, msgRe, statusRe] of cases) {
     const { ctx } = await newCtx({}, body);
     const page = await ctx.newPage();
-    await page.goto(`${base}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
+    await page.goto(`${site}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
     await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
     for (const el of await page.locator('.ad-net iframe').all()) await el.scrollIntoViewIfNeeded();
     const panel = page.locator('pre[role=log]');
@@ -125,7 +137,8 @@ test('?adsdebug=1 shows an on-page report: working ads say ok, failing ad script
     const ctxMsg = `${label}: ${text.slice(0, 900)}`;
     assert.match(text, /ADS DEBUG/, ctxMsg); assert.match(text, /frame=created/, ctxMsg);
     assert.match(text, msgRe, `${label}: ${text.slice(0, 700)}`); assert.match(text, statusRe, ctxMsg);
-    if (/storage/.test(label)) assert.match(text, /HINT: the ad script crashed and this isolated frame blocks storage/, ctxMsg);
+    if (/crashes/.test(label)) assert.match(text, /HINT: the ad script reported an error/, ctxMsg);
+    assert.match(text, /origin=https:\/\/ads\.getalltools\.shop/, ctxMsg);
     if (/nothing/.test(label)) assert.match(text, /HINT: the ad script ran without errors but showed nothing/, ctxMsg);
     if (/working/.test(label)) assert.match(text, /HINT: the ad network placed content/, ctxMsg);
     await ctx.close();
@@ -133,22 +146,35 @@ test('?adsdebug=1 shows an on-page report: working ads say ok, failing ad script
   // the network host cannot be reached at all (blocker, firewall): the report says so and does not blame storage
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await routeSite(ctx);
     await ctx.route('https://bauval.org/**', (r) => r.abort('blockedbyclient'));
     const page = await ctx.newPage();
-    await page.goto(`${base}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
+    await page.goto(`${site}/tools/merge-pdf/?adsdebug=1`, { waitUntil: 'networkidle' });
     await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
     for (const el of await page.locator('.ad-net iframe').all()) await el.scrollIntoViewIfNeeded();
     await page.waitForFunction(() => /could not download the ad network script/.test(document.querySelector('pre[role=log]')?.textContent ?? ''), null, { timeout: 15000 });
     const t = await page.locator('pre[role=log]').innerText();
     assert.match(t, /failed to load from bauval\.org/); assert.match(t, /status=error/);
-    assert.ok(!/crashed and this isolated frame blocks storage/.test(t), 'a failed download must not be reported as a storage problem');
+    assert.ok(!/blocks storage/.test(t), 'a failed download must not be reported as a storage problem');
     await ctx.close();
   }
   // without ?adsdebug=1 there is no panel
   const { ctx } = await newCtx();
   const page = await ctx.newPage();
-  await page.goto(`${base}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
+  await page.goto(`${site}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
   assert.equal(await page.locator('pre[role=log]').count(), 0);
+  await ctx.close();
+});
+
+test('if the frames were served from the page origin itself, allow-same-origin is NOT added (strict sandbox fallback)', async () => {
+  const { ctx } = await newCtx();
+  const page = await ctx.newPage();
+  // the ads host itself is not "separate" from itself: simulate by loading the site on the ads host
+  await page.goto(`${adsHost}/tools/merge-pdf/`, { waitUntil: 'networkidle' });
+  await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
+  await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
+  const sb = await page.locator('.ad-net iframe').first().getAttribute('sandbox');
+  assert.ok(!/allow-same-origin/.test(sb), sb);
   await ctx.close();
 });
 
@@ -160,7 +186,7 @@ test('banner choice follows the screen: desktop gets 728x90 where it fits, phone
     const { ctx } = await newCtx(opts);
     const page = await ctx.newPage();
     for (const [path, sizes] of Object.entries(expected)) {
-      await page.goto(base + path, { waitUntil: 'networkidle' });
+      await page.goto(site + path, { waitUntil: 'networkidle' });
       await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
       await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
       const got = await page.locator('.ad-net iframe').evaluateAll((els) => els.map((e) => `${e.width}x${e.height}`));
@@ -171,7 +197,7 @@ test('banner choice follows the screen: desktop gets 728x90 where it fits, phone
     }
     // the 728 banner placeholder is hidden (not loaded) on a phone
     if (label === 'phone') {
-      await page.goto(base + '/tools/merge-pdf/', { waitUntil: 'networkidle' });
+      await page.goto(site + '/tools/merge-pdf/', { waitUntil: 'networkidle' });
       await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
       await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
       assert.equal(await page.locator('.ad-net iframe').count(), 2);
@@ -187,7 +213,7 @@ test('ads-enabled pages stay accessible, and the legal pages name the network', 
   const page = await ctx.newPage();
   const bad = [];
   for (const u of ['/', '/tools/merge-pdf/', '/blog/jpg-vs-png-vs-webp/']) {
-    await page.goto(base + u, { waitUntil: 'networkidle' });
+    await page.goto(site + u, { waitUntil: 'networkidle' });
     await page.evaluate(() => localStorage.setItem('th-consent', 'granted'));
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
@@ -196,10 +222,10 @@ test('ads-enabled pages stay accessible, and the legal pages name the network', 
     for (const v of res.violations) bad.push(`${u}: ${v.id} ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`);
   }
   assert.deepEqual(bad, []);
-  await page.goto(`${base}/privacy/`);
+  await page.goto(`${site}/privacy/`);
   assert.match(await page.locator('main').innerText(), /banner advertising served by Adsterra/);
   assert.match(await page.locator('main').innerText(), /We do not use pop-ups or pop-unders/);
-  await page.goto(`${base}/cookies/`);
+  await page.goto(`${site}/cookies/`);
   assert.match(await page.locator('main').innerText(), /banner advertising from Adsterra/);
   await ctx.close();
 });

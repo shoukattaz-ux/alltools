@@ -19,7 +19,8 @@ How it works:
 - Placement: tool pages (under the instructions, between sections on wide screens, sidebar), guides (inside the article), homepage (two spots). Never inside the tool, never near Download buttons.
 - Banner choice: the 728x90 leaderboard is used only on screens 800 px wide or more; phones get the 300x250. The 728 banner is never loaded on a phone.
 - Consent: nothing from the ad network loads until the visitor presses Accept. Rejecting keeps ads off.
-- Isolation: each banner runs in a **sandboxed iframe without `allow-same-origin`** that loads `/ads/300x250/` or `/ads/728x90/`. The ad network's code cannot read this site's pages, cookies or storage, and can only navigate the page after a real click.
+- Isolation: each banner runs in a **sandboxed iframe on its own origin, `https://ads.getalltools.shop`** (same Worker, extra Custom domain), loading `/ads/300x250/` or `/ads/728x90/`. The separate origin is what lets the ad use its own storage/cookies (`allow-same-origin`, which the ad network needs to render) while it still cannot read this site's pages, cookies or storage. If a page is ever served from the ads host itself, `allow-same-origin` is not added.
+- **One-time setup:** Cloudflare → Workers & Pages → `alltools` → Settings → Domains & Routes → Add → Custom domain → `ads.getalltools.shop`. Optional: a Redirect Rule so any path on that host that is not `/ads/...` redirects to `https://getalltools.shop` (avoids duplicate pages; pages already carry canonical tags). Without this domain the ad frames cannot load.
 - Headers: `public/_headers` gives `/ads/*` its own policy (detaching the strict site policy for those two files only). The rest of the site keeps `script-src 'self'`.
 - `/ads/` is `noindex`, disallowed in robots.txt and not in the sitemap.
 - Reserved height on every slot, so ads cause no layout shift.

@@ -4,7 +4,7 @@
 # Cloudflare MERGES matching rules, so do not repeat a header here that a later rule sets (e.g. Cache-Control).
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: data:; frame-src 'self' https://ads.getalltools.shop; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
@@ -30,14 +30,15 @@
 /og-image.png
   Cache-Control: public, max-age=86400
 
-# Ad frames: each banner runs in a sandboxed iframe (no allow-same-origin) that loads one of these pages.
+# Ad frames: each banner runs in a sandboxed iframe on its OWN origin (ads.getalltools.shop, same Worker) that loads one of these pages.
+# The different origin is what makes it safe to allow the ad its own storage; it still cannot reach the site.
 # They need a looser policy than the rest of the site, so the strict policy is detached here and replaced.
-# Only our own pages may frame them. Do not add other pages under /ads/.
+# Only the main site may frame them. Do not add other pages under /ads/.
 /ads/*
   ! Content-Security-Policy
   ! X-Frame-Options
   ! Cross-Origin-Opener-Policy
-  Content-Security-Policy: default-src https: data: blob:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'; img-src https: data: blob:; media-src https: blob:; frame-src https:; connect-src https:; base-uri 'none'; form-action https:; frame-ancestors 'self'
+  Content-Security-Policy: default-src https: data: blob:; script-src https: 'unsafe-inline' 'unsafe-eval'; style-src https: 'unsafe-inline'; img-src https: data: blob:; media-src https: blob:; frame-src https:; connect-src https:; base-uri 'none'; form-action https:; frame-ancestors https://getalltools.shop
   X-Robots-Tag: noindex, nofollow
   Cache-Control: public, max-age=3600
 
