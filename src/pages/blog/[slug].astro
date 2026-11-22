@@ -29,6 +29,7 @@ const prettyDate = new Date(d.date + 'T00:00:00Z').toLocaleDateString('en-GB', {
     <p class="post-meta" style="margin:0">By the {SITE.name} editorial team · {prettyDate} · {d.readingMinutes} min read</p>
   </Fragment>
   <article class="prose article">
+    <AdSlot placement="blog-top" />
     <Content />
     <AdSlot placement="blog-in-article" />
     <div class="tool-cta">

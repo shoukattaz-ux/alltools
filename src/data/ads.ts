@@ -11,7 +11,7 @@
  * Rules built in: ads never render inside the tool interface, never auto-refresh, never overlay content, and always sit in a
  * clearly labelled box with reserved height (no layout shift). See docs/ADVERTISING.md.
  */
-export type AdPlacement = 'home-content' | 'home-lower' | 'tool-below-instructions' | 'tool-between-sections' | 'blog-in-article' | 'sidebar';
+export type AdPlacement = 'home-content' | 'home-lower' | 'tool-below-instructions' | 'tool-between-sections' | 'blog-in-article' | 'sidebar' | 'tool-top' | 'tool-bottom' | 'blog-top' | 'list-page';
 
 /** The ad keys are public by design (they appear in the page source of any site that shows the ad). */
 export const ADSTERRA_UNITS = {
@@ -33,6 +33,10 @@ export const AD_SLOTS: Record<AdPlacement, { slot: string; minHeight: number; ad
   'tool-between-sections': { slot: '', minHeight: 90, adsterra: '728x90' },
   'blog-in-article': { slot: '', minHeight: 250, adsterra: 'auto' },
   sidebar: { slot: '', minHeight: 250, adsterra: '300x250' },
+  'tool-top': { slot: '', minHeight: 250, adsterra: 'auto' },
+  'tool-bottom': { slot: '', minHeight: 250, adsterra: '300x250' },
+  'blog-top': { slot: '', minHeight: 250, adsterra: 'auto' },
+  'list-page': { slot: '', minHeight: 250, adsterra: 'auto' },
 };
 
 /**

@@ -48,7 +48,7 @@ test('nothing from the ad network loads before consent; reject keeps it that way
   assert.ok(await page.locator('[data-consent-banner]').isVisible(), 'consent banner shown');
   assert.equal(await page.locator('.ad-net iframe').count(), 0, 'no ad frames before consent');
   assert.equal(adRequests.length, 0);
-  assert.equal(await page.locator('.ad-net').count(), 3, 'three ad containers on a tool page (below instructions, between sections, sidebar)');
+  assert.equal(await page.locator('.ad-net').count(), 5, 'five ad containers on a tool page (top, below instructions, between sections, bottom, sidebar)');
   await page.getByRole('button', { name: 'Reject optional' }).first().click();
   await page.waitForTimeout(500);
   await page.reload({ waitUntil: 'networkidle' });
@@ -65,8 +65,8 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
   await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
   const frames = await page.locator('.ad-net iframe').evaluateAll((els) => els.map((e) => ({ src: e.getAttribute('src'), w: e.width, h: e.height, sandbox: e.getAttribute('sandbox'), title: e.title, lazy: e.loading })));
-  assert.equal(frames.length, 3);
-  assert.deepEqual(frames.map((f) => `${f.w}x${f.h}`).sort(), ['300x250', '300x250', '728x90']);
+  assert.equal(frames.length, 5);
+  assert.deepEqual(frames.map((f) => `${f.w}x${f.h}`).sort(), ['300x250', '300x250', '300x250', '728x90', '728x90']);
   for (const f of frames) {
     assert.match(f.src, /^https:\/\/ads\.getalltools\.shop\/ads\/(300x250|728x90)\/$/, 'ad frames live on their own origin');
     assert.ok(/allow-same-origin/.test(f.sandbox), 'on a separate origin the ad gets its own storage (allow-same-origin)');
@@ -76,7 +76,7 @@ test('after accepting: banner frames are created with the right sizes, sandboxed
   }
   // scroll each frame into view so lazy loading fires, then check the ad script ran inside the frame and is isolated from the page
   for (const el of await page.locator('.ad-net iframe').all()) await el.scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => document.querySelectorAll('.ad-net iframe').length === 3);
+  await page.waitForFunction(() => document.querySelectorAll('.ad-net iframe').length === 5);
   await page.waitForTimeout(1500);
   assert.ok(adRequests.length >= 2, `ad script requested after consent (${adRequests.length})`);
   assert.ok(adRequests.every((u) => /bauval\.org\/22\/(e7f4f2349f0b5f09bce2bc02ff2e0975|bff97ad5f8f26196cb49bfa41adfea78)$/.test(u)), adRequests.join(', '));
@@ -180,8 +180,8 @@ test('if the frames were served from the page origin itself, allow-same-origin i
 
 test('banner choice follows the screen: desktop gets 728x90 where it fits, phones get 300x250 and never the wide banner', async () => {
   for (const [label, opts, expected] of [
-    ['desktop', { viewport: { width: 1280, height: 900 } }, { '/': ['728x90', '300x250'], '/blog/jpg-vs-png-vs-webp/': ['728x90'] }],
-    ['phone', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, { '/': ['300x250', '300x250'], '/blog/jpg-vs-png-vs-webp/': ['300x250'] }],
+    ['desktop', { viewport: { width: 1280, height: 900 } }, { '/': ['728x90', '300x250'], '/blog/jpg-vs-png-vs-webp/': ['728x90', '728x90'] }],
+    ['phone', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }, { '/': ['300x250', '300x250'], '/blog/jpg-vs-png-vs-webp/': ['300x250', '300x250'] }],
   ]) {
     const { ctx } = await newCtx(opts);
     const page = await ctx.newPage();
@@ -200,7 +200,7 @@ test('banner choice follows the screen: desktop gets 728x90 where it fits, phone
       await page.goto(site + '/tools/merge-pdf/', { waitUntil: 'networkidle' });
       await page.locator('[data-consent-banner]').getByRole('button', { name: 'Accept' }).click();
       await page.locator('.ad-net iframe').first().waitFor({ state: 'attached' });
-      assert.equal(await page.locator('.ad-net iframe').count(), 2);
+      assert.equal(await page.locator('.ad-net iframe').count(), 4);
       assert.equal(await page.locator('.ad-net[data-ad-choice="728x90"]').isHidden(), true);
     }
     await ctx.close();

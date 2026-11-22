@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import ToolBrowser from '../../components/ToolBrowser.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { TOOLS, toolUrl } from '../../data/tools';
 import { SITE } from '../../data/site';
 const listLd = [{ '@context': 'https://schema.org', '@type': 'ItemList', name: `${SITE.name} tools`, itemListElement: TOOLS.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.name, url: `${SITE.url}${toolUrl(t)}` })) }];
@@ -11,4 +12,5 @@ const listLd = [{ '@context': 'https://schema.org', '@type': 'ItemList', name: `
     <p class="lead">{TOOLS.length} free tools for PDFs, images and everyday calculations. Search, or filter by category.</p>
   </Fragment>
   <ToolBrowser id="all" autoquery />
+  <div class="container"><AdSlot placement="list-page" /></div>
 </Base>

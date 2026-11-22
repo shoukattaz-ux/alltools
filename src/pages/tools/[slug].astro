@@ -45,6 +45,7 @@ const catLabel = cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase());
   <div class="container">
     <div class="tool-layout section">
       <div class="content-block">
+        <AdSlot placement="tool-top" />
         <h2>How to use the {tool.name}</h2>
         <ol class="steps">{tool.steps.map((s) => <li>{s}</li>)}</ol>
 
@@ -67,6 +68,8 @@ const catLabel = cat.name.replace(/^(?!PDF)(\w)/, (c) => c.toLowerCase());
 
         <h2>Frequently asked questions</h2>
         <FaqList faqs={tool.faqs} />
+
+        <AdSlot placement="tool-bottom" />
 
         {guides.length > 0 && (
           <>
